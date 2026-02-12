@@ -3,3 +3,65 @@ Give me the steps to connect the ChatGPT to NetSuite using the NetSuiteConnector
 Clear steps, not steps, should be ignored. Also provide the requirement to dothat like any special account needed in the NetSuite.
 
 
+
+
+
+
+You can’t expose a File Cabinet “CustomTool” script directly to ChatGPT just by placing SeoUpdateTool.js + SeoUpdateSchema.json in NetSuite. ChatGPT can only call what the connector exposes as callable endpoints (right now: the ns_* tools).
+
+So you have two workable ways to “expose it”:
+
+Option 1 (recommended): Turn it into a RESTlet, then add a ChatGPT tool that calls it
+A) NetSuite side: expose an HTTP endpoint
+
+Create a RESTlet wrapper (SuiteScript 2.1, @NScriptType Restlet)
+
+In the RESTlet post() handler:
+
+validate { itemSKU, seoDescription, pageTitle? }
+
+run the same logic you already have (search item by SKU → load item → set fields → save)
+
+Deploy the RESTlet (Script Deployment) and note the RESTlet URL.
+
+Secure it (Token-Based Auth / OAuth2 / integration user role w/ least privileges).
+
+B) ChatGPT side: expose as a tool/action
+
+You then need one of these:
+
+Extend your “NetSuite AI Connector Service” to include a new tool (e.g., ns_updateItemSEO) that calls the RESTlet URL internally, or
+
+Create a Custom GPT Action (OpenAPI) that calls the RESTlet (often easiest if you can host a small middleware proxy to handle auth safely).
+
+Key point: The “tool list” comes from the connector, not from NetSuite File Cabinet contents.
+
+Option 2 (no SuiteScript needed): Use existing NetSuite connector tools to do the same update
+
+Your script does:
+
+find item internal id by SKU
+
+update description + page title
+
+save
+
+You can already do that with the tools you have:
+
+Use ns_runCustomSuiteQL (or a saved search) to find the item internal ID by itemid
+
+Then use ns_updateRecord to set the fields
+
+Also: the REST Record metadata for inventoryitem shows the web store fields exposed with REST names like storeDescription / storeDetailedDescription (and others like metaTagHtml). I pulled metadata for inventoryitem from your account and those fields are present there. So the update can be done without calling your SuiteScript at all.
+
+Note: SuiteScript field IDs like storedescription / pagetitle don’t always match REST field names 1:1, so metadata is the source of truth for what ns_updateRecord expects.
+
+Which one should you pick?
+
+If you must run custom logic (complex rules, transformations, multi-record updates): RESTlet + new ChatGPT tool
+
+If you just need to set fields (like description + title): skip the script and use ns_runCustomSuiteQL + ns_updateRecord
+
+If you tell me whether you want (A) a RESTlet design or (B) the “no script” approach, I’ll give you the exact request/response contract + the concrete SuiteQL + record payload shape to implement it.
+
+DEVELOPER MODE
