@@ -8,3 +8,6 @@ Fail to evaluate script: {"type":"error.SuiteScriptModuleLoaderError","name":"Sy
 
 
 Error: nlapiResolveURL: type argument savedsearch is not a valid record or is not available in your account. Please see the documentation for a list of supported record types.
+
+
+Error: NetSuite rejected the search criteria: A search has already been saved with that name. Please use a different name.
