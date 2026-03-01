@@ -3,3 +3,8 @@ Fail to evaluate script: {"type":"error.SuiteScriptModuleLoaderError","name":"Sy
 
 
 {"error":"I couldn't save that search. It might be due to invalid field names. Error: Unexpected token _ in JSON at position 0"}
+
+
+
+
+Error: nlapiResolveURL: type argument savedsearch is not a valid record or is not available in your account. Please see the documentation for a list of supported record types.
