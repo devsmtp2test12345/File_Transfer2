@@ -1,0 +1,9 @@
+Business use cases would be :
+
+1. Create saved searches or reports, workbooks for any available or exposed transactions.
+2. Create PDF with given required layout.  
+3. Create any transactions in Netsuite with data fed manually or scanned from any PDF or any file. 
+4. Scan documents and attach on any transactions detected using unique ID from Netsuite or entity.
+5. Get /export details in any file format from Netsuite to save on desktop.
+6. Can create any other record which is defined in Netsuite as per instruction, like role with given basic permissions , employee record with basic role.
+7. Create optimization, suggestion document for any scripts code.
