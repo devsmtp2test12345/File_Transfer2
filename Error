@@ -17,5 +17,7 @@ Error: NetSuite rejected the search criteria: A search has already been saved wi
 Execution Error: NetSuite rejected the search criteria: An unexpected SuiteScript error has occurred
 
 
+{"error":"Pipeline Error: Unexpected token _ in JSON at position 0"}
+
 
 
