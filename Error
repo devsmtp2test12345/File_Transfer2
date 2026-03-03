@@ -29,4 +29,8 @@ Execution Error: NetSuite rejected the search criteria: An unexpected SuiteScrip
 ```
 
 
+Execution Error: NetSuite rejected the search criteria. This is usually due to the AI guessing an incorrect field name or filter operator.
+
+Details: An nlobjSearchColumn contains an invalid column join ID, or is not in proper syntax: customer.name.
+
 
