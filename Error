@@ -11,3 +11,11 @@ Error: nlapiResolveURL: type argument savedsearch is not a valid record or is no
 
 
 Error: NetSuite rejected the search criteria: A search has already been saved with that name. Please use a different name.
+
+
+
+Execution Error: NetSuite rejected the search criteria: An unexpected SuiteScript error has occurred
+
+
+
+
