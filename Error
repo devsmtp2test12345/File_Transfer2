@@ -34,3 +34,14 @@ Execution Error: NetSuite rejected the search criteria. This is usually due to t
 Details: An nlobjSearchColumn contains an invalid column join ID, or is not in proper syntax: customer.name.
 
 
+
+Save a search for all Customers with a balance greater than 10.
+
+Create a saved search customer open credit memo.
+
+Create a saved search customer open invoices for last two week
+
+sales order count last week
+
+Invoice count last month
+
