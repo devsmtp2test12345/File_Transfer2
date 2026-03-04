@@ -47,3 +47,8 @@ sales order count last week
 Execution Error: NetSuite rejected the search criteria. This is usually due to the AI guessing an incorrect field name or filter operator. Details: search.createFilter: Missing a required argument: name
 Invoice count last month
 
+
+
+
+Execution Error: NetSuite rejected the search criteria. Details: An nlobjSearchColumn contains an invalid column, or is not in proper syntax: createddate
+
