@@ -1,192 +1,291 @@
 /**
  * @NApiVersion 2.1
  * @NScriptType Suitelet
+ * @NModuleScope SameAccount
+ * * Architectural Blueprint: High-Accuracy Formula Generator Bot (Chat UI Edition)
+ * Utilizes N/llm, Retrieval-Augmented Generation (RAG), programmatic search validation,
+ * and an asynchronous conversational frontend.
  */
-define(['N/ui/serverWidget', 'N/https', 'N/runtime', 'N/log', 'N/search', 'N/url'], (serverWidget, https, runtime, log, search, url) => {
 
-    const GEMINI_MODEL = 'gemini-2.5-flash';
+define(['N/ui/serverWidget', 'N/llm', 'N/search', 'N/query'], 
+function (serverWidget, llm, search, query) {
 
-    function onRequest(context) {
-        // 1. Setup UI (GET)
-        if (context.request.method === 'GET') {
-            const form = serverWidget.createForm({ title: 'NetSuite Search Auto-Creator' });
-            const htmlField = form.addField({ id: 'custpage_html', type: 'inlinehtml', label: 'HTML' });
-            
-            // Using the robust HTML/CSS structure from your provided logic
-            htmlField.defaultValue = `
-                <style>
-                    body { font-family: -apple-system, sans-serif; padding: 20px; background-color: #f8f9fa; }
-                    #chat-box { border: 1px solid #dee2e6; height: 450px; overflow-y: auto; padding: 15px; margin-bottom: 15px; background: #fff; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); }
-                    .user-msg { color: #fff; background-color: #1a73e8; margin: 10px 0 10px auto; padding: 10px 15px; border-radius: 15px 15px 0 15px; max-width: 75%; width: fit-content; clear: both; float: right; }
-                    .ai-msg { color: #333; margin: 10px auto 10px 0; background: #f1f3f4; padding: 10px 15px; border-radius: 15px 15px 15px 0; max-width: 80%; width: fit-content; clear: both; float: left; border: 1px solid #e8eaed; line-height: 1.5; }
-                    .error-msg { color: #d93025; background-color: #feefee; border: 1px solid #fad2cf; padding: 12px; border-radius: 8px; margin: 10px 0; clear: both; font-family: monospace; font-size: 12px; }
-                    .loader { font-style: italic; color: #5f6368; margin: 10px 0; clear: both; }
-                    .input-area { display: flex; gap: 10px; clear: both; }
-                    input[type="text"] { flex-grow: 1; padding: 12px; border: 1px solid #dadce0; border-radius: 24px; outline: none; padding-left: 20px; }
-                    button { padding: 12px 25px; cursor: pointer; background: #1a73e8; color: white; border: none; border-radius: 24px; font-weight: bold; transition: background 0.2s; }
-                    button:hover { background: #1557b0; }
-                    .search-link { display: inline-block; margin-top: 5px; color: #1a73e8; text-decoration: underline; font-weight: 600; }
-                </style>
-                <div id="chat-box">
-                    <div class="ai-msg">I can create and save searches for you. Example: "Save a search for all Customers in California."</div>
-                </div>
-                <div class="input-area">
-                    <input type="text" id="user-input" placeholder="Describe the search to save..." onkeydown="if(event.key === 'Enter') sendMessage()">
-                    <button id="send-btn" onclick="sendMessage()">Create & Save</button>
-                </div>
-                <script>
-                    async function sendMessage() {
-                        var input = document.getElementById('user-input');
-                        var box = document.getElementById('chat-box');
-                        var btn = document.getElementById('send-btn');
-                        var msg = input.value.trim();
-                        if(!msg) return;
+    // --- Core Backend Functions (Untouched for stability) ---
 
-                        box.innerHTML += '<div class="user-msg">' + msg.replace(/</g, "&lt;") + '</div>';
-                        input.value = '';
-                        input.disabled = true; btn.disabled = true;
-                        
-                        var loadingId = 'loading-' + Date.now();
-                        box.innerHTML += '<div id="' + loadingId + '" class="loader">Gemini is configuring NetSuite...</div>';
-                        box.scrollTop = box.scrollHeight;
-
-                        try {
-                            const response = await fetch(window.location.href, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ prompt: msg })
-                            });
-                            
-                            const textResponse = await response.text();
-                            let data;
-                            try {
-                                data = JSON.parse(textResponse);
-                            } catch(e) {
-                                throw new Error("Server returned invalid JSON.");
-                            }
-
-                            document.getElementById(loadingId).remove();
-                            if (data.error) {
-                                box.innerHTML += '<div class="error-msg"><b>Error:</b> ' + data.error + '</div>';
-                            } else {
-                                box.innerHTML += '<div class="ai-msg">' + data.answer + '</div>';
-                            }
-                        } catch (e) {
-                            if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
-                            box.innerHTML += '<div class="error-msg"><b>Connection Error:</b> ' + e.message + '</div>';
-                        }
-                        input.disabled = false; btn.disabled = false;
-                        input.focus();
-                        box.scrollTop = box.scrollHeight;
-                    }
-                </script>
-            `;
-            context.response.writePage(form);
+    const calculateCosineSimilarity = (vecA, vecB) => {
+        let dotProduct = 0;
+        let normA = 0;
+        let normB = 0;
+        for (let i = 0; i < vecA.length; i++) {
+            dotProduct += vecA[i] * vecB[i];
+            normA += Math.pow(vecA[i], 2);
+            normB += Math.pow(vecB[i], 2);
         }
-        
-        // 2. Handle Logic (POST)
-        else if (context.request.method === 'POST') {
-            context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
-            
-            try {
-                // Validate API Key
-                const scriptObj = runtime.getCurrentScript();
-                const rawApiKey = scriptObj.getParameter({ name: 'custscript_open_ai_api_key' });
-                if (!rawApiKey) throw new Error("Missing API Key (custscript_open_ai_api_key) in script parameters.");
-                const apiKey = rawApiKey.trim();
+        if (normA === 0 || normB === 0) return 0; 
+        return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+    };
 
-                const requestBody = (typeof context.request.body === 'object') ? context.request.body : JSON.parse(context.request.body);
-                const userPrompt = requestBody.prompt;
-
-                // 3. AI Prompt Construction
-                const systemPrompt = "You are a NetSuite system helper. " +
-                                     "Convert the user request into a JSON object for 'search.create()'. " +
-                                     "Include 'type', 'filters', 'columns', and a 'title'. " +
-                                     "The 'title' must start with 'AI Generated: '. " +
-                                     "Return ONLY the raw JSON object. NO markdown (no ```json).";
-                
-                const aiResponseRaw = callGeminiAPI(systemPrompt + "\n\nUser Request: " + userPrompt, apiKey);
-
-                // 4. Clean and Parse JSON
-                // Robust cleaning similar to your SuiteQL logic
-                const cleanJson = aiResponseRaw.replace(/```json/g, "").replace(/```/g, "").replace(/JSON/g, "").trim();
-                
-                let searchConfig;
-                try {
-                    searchConfig = JSON.parse(cleanJson);
-                } catch (jsonErr) {
-                    throw new Error("AI returned invalid JSON. Raw response: " + cleanJson.substring(0, 50) + "...");
-                }
-
-                // 5. Create and Save Search
-                let searchId;
-                try {
-                    const newSearch = search.create(searchConfig);
-                    searchId = newSearch.save();
-                } catch (searchErr) {
-                    throw new Error("NetSuite rejected the search criteria: " + searchErr.message);
-                }
-
-                // 6. Generate Link (FIXED: Using Relative URL)
-                // This resolves to something like "/app/common/search/savedsearch.nl?id=123"
-                // It avoids the "fully qualified URL" error because we don't use resolveDomain.
-                const relativePath = url.resolveRecord({
-                    recordType: 'savedsearch',
-                    recordId: searchId,
-                    isEditMode: false
-                });
-
-                const finalAnswer = "Success! I saved the search <b>" + searchConfig.title + "</b>.<br>" +
-                                    "<a href='" + relativePath + "' target='_blank' class='search-link'>Click here to open it</a>";
-
-                context.response.write(JSON.stringify({ 
-                    answer: finalAnswer, 
-                    id: searchId 
-                }));
-
-            } catch (e) {
-                log.error('POST Process Error', e.message);
-                context.response.write(JSON.stringify({ error: e.message }));
-            }
-        }
-    }
-
-    /**
-     * Robust Gemini API Caller
-     */
-    function callGeminiAPI(promptText, key) {
-        const baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/";
-        const endpoint = GEMINI_MODEL + ":generateContent?key=" + key;
-        const fullUrl = baseUrl + endpoint;
-
-        const response = https.post({
-            url: fullUrl,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: { temperature: 0.1 }
-            })
+    const retrieveRelevantFormulas = (userQueryVector) => {
+        const formulaLibrary = []; 
+        const formulaSearch = search.create({
+            type: 'customrecord_ns_formula_lib',
+            columns: [
+                'custrecord_formula_description', 
+                'custrecord_formula_syntax', 
+                'custrecord_formula_embedding'
+            ]
         });
 
-        if (response.code !== 200) {
-            log.error('Gemini API Fail', 'Status: ' + response.code + ' Body: ' + response.body);
-            throw new Error("Gemini API Error (" + response.code + ")");
-        }
+        formulaSearch.run().each(result => {
+            const embeddingString = result.getValue('custrecord_formula_embedding');
+            if (embeddingString) {
+                const recordVector = JSON.parse(embeddingString);
+                const similarity = calculateCosineSimilarity(userQueryVector, recordVector);
+                formulaLibrary.push({
+                    id: result.id,
+                    description: result.getValue('custrecord_formula_description'),
+                    syntax: result.getValue('custrecord_formula_syntax'),
+                    score: similarity
+                });
+            }
+            return true;
+        });
+        return formulaLibrary.sort((a, b) => b.score - a.score).slice(0, 3);
+    };
 
-        let resBody;
+    const validateFormulaSyntax = (formulaString) => {
         try {
-            resBody = JSON.parse(response.body.trim());
-        } catch (parseErr) {
-            log.error('JSON Parse Error', 'Body: ' + response.body);
-            throw new Error("Could not parse AI response.");
+            search.create({
+                type: search.Type.CUSTOMER,
+                columns: [search.createColumn({ name: 'formulatext', formula: formulaString })] 
+            });
+            return { isValid: true, error: null };
+        } catch (e) {
+            return { isValid: false, error: e.message };
         }
+    };
 
-        if (resBody.candidates && resBody.candidates[0].content) {
-            return resBody.candidates[0].content.parts[0].text;
-        } else {
-            throw new Error("AI returned empty result.");
+    // --- UI HTML/CSS/JS Payload ---
+
+    const generateChatbotUI = () => {
+        return `
+        <style>
+            #bot-workspace { display: flex; justify-content: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+            #chat-container { width: 100%; max-width: 850px; border: 1px solid #d3d8db; border-radius: 12px; display: flex; flex-direction: column; height: 65vh; min-height: 500px; background-color: #f4f6f9; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+            #chat-messages { flex-grow: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+            .chat-message { max-width: 85%; padding: 14px 18px; border-radius: 8px; font-size: 14px; line-height: 1.5; word-wrap: break-word; }
+            .user-msg { background-color: #607799; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+            .bot-msg { background-color: white; border: 1px solid #e1e5e8; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+            .bot-msg pre { background-color: #2b303b; color: #c0c5ce; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; margin: 12px 0; font-size: 13px; }
+            .copy-btn { background-color: #e0e6ed; color: #333; border: 1px solid #cdd4dc; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+            .copy-btn:hover { background-color: #d1d8e0; }
+            #chat-input-area { display: flex; padding: 15px 20px; background-color: white; border-top: 1px solid #d3d8db; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; align-items: center; gap: 10px; }
+            #chat-input { flex-grow: 1; padding: 12px 15px; border: 1px solid #cdd4dc; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+            #chat-input:focus { border-color: #607799; }
+            #send-btn { background-color: #4d5f7a; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: bold; transition: background-color 0.2s; }
+            #send-btn:hover { background-color: #3b495e; }
+            #send-btn:disabled { background-color: #a0abbc; cursor: not-allowed; }
+            .typing-indicator { font-style: italic; color: #7f8c8d; font-size: 13px; }
+        </style>
+
+        <div id="bot-workspace">
+            <div id="chat-container">
+                <div id="chat-messages">
+                    <div class="chat-message bot-msg">
+                        <strong>NetSuite AI Formula Bot</strong><br>
+                        Hello! I am ready to generate and validate complex saved search formulas for you. What logic do you need help writing today?
+                    </div>
+                </div>
+                <div id="chat-input-area">
+                    <input type="text" id="chat-input" placeholder="e.g., Calculate days between date created and closed..." onkeypress="if(event.key === 'Enter') sendQuery()" />
+                    <button id="send-btn" onclick="sendQuery()">Generate</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function sendQuery() {
+                const inputField = document.getElementById('chat-input');
+                const sendBtn = document.getElementById('send-btn');
+                const query = inputField.value.trim();
+
+                if (!query) return;
+
+                // 1. Render User Message
+                appendMessage(query, 'user-msg');
+                inputField.value = '';
+                inputField.disabled = true;
+                sendBtn.disabled = true;
+
+                // 2. Render Loading State
+                const loadingId = 'loading-' + Date.now();
+                appendMessage('Thinking, generating, and compiling formula against NetSuite search engine...', 'bot-msg typing-indicator', loadingId);
+
+                try {
+                    // 3. Send Async POST Request to this Suitelet
+                    const response = await fetch(window.location.href, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query })
+                    });
+
+                    const data = await response.json();
+                    document.getElementById(loadingId).remove(); // Clear loading
+
+                    // 4. Render Bot Response
+                    if (data.success) {
+                        const formulaId = 'code-' + Date.now();
+                        const htmlResponse = \`
+                            <strong>Validated Formula Generated:</strong>
+                            <pre id="\${formulaId}">\${escapeHtml(data.formula)}</pre>
+                            <button class="copy-btn" onclick="copyToClipboard('\${formulaId}', this)">
+                                📋 Copy Formula
+                            </button>
+                        \`;
+                        appendHtmlMessage(htmlResponse, 'bot-msg');
+                    } else {
+                        appendMessage('❌ Validation Failed: ' + data.error, 'bot-msg');
+                    }
+                } catch (error) {
+                    document.getElementById(loadingId).remove();
+                    appendMessage('⚠️ System Error: ' + error.message, 'bot-msg');
+                } finally {
+                    inputField.disabled = false;
+                    sendBtn.disabled = false;
+                    inputField.focus();
+                    scrollToBottom();
+                }
+            }
+
+            // --- Helper Functions ---
+            function appendMessage(text, className, id = '') {
+                const messagesArea = document.getElementById('chat-messages');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-message ' + className;
+                if (id) msgDiv.id = id;
+                msgDiv.textContent = text;
+                messagesArea.appendChild(msgDiv);
+                scrollToBottom();
+            }
+
+            function appendHtmlMessage(html, className) {
+                const messagesArea = document.getElementById('chat-messages');
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-message ' + className;
+                msgDiv.innerHTML = html;
+                messagesArea.appendChild(msgDiv);
+                scrollToBottom();
+            }
+
+            function scrollToBottom() {
+                const messagesArea = document.getElementById('chat-messages');
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            }
+
+            function copyToClipboard(elementId, btnElement) {
+                const textToCopy = document.getElementById(elementId).textContent;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = btnElement.innerHTML;
+                    btnElement.innerHTML = '✅ Copied!';
+                    setTimeout(() => { btnElement.innerHTML = originalText; }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            }
+
+            function escapeHtml(unsafe) {
+                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+        </script>
+        `;
+    };
+
+    /**
+     * Primary Suitelet Request Handler executing the architectural flow.
+     */
+    const onRequest = (context) => {
+        if (context.request.method === 'GET') {
+            // Render the Chat UI wrapper
+            const form = serverWidget.createForm({ title: 'AI Formula Assistant', hideNavBar: false });
+            
+            const htmlField = form.addField({
+                id: 'custpage_chat_ui',
+                type: serverWidget.FieldType.INLINEHTML,
+                label: 'Chat UI'
+            });
+            
+            htmlField.defaultValue = generateChatbotUI();
+            context.response.writePage(form);
+            
+        } else if (context.request.method === 'POST') {
+            // Act as an API endpoint for the frontend Javascript
+            let responsePayload = { success: false, formula: '', error: '' };
+
+            try {
+                // Parse the JSON payload sent via fetch()
+                const requestBody = JSON.parse(context.request.body);
+                const userQuery = requestBody.query;
+
+                let finalFormula = '';
+                let validationAttempts = 0;
+                const maxAttempts = 3;
+
+                // Architectural Step 1: Vectorize the user's natural language query
+                const queryEmbeddingResponse = llm.embed({
+                    inputs: [userQuery],
+                    embedModelFamily: llm.EmbedModelFamily.COHERE_EMBED
+                });
+                const userQueryVector = queryEmbeddingResponse.embeddings[0]; 
+
+                // Architectural Step 2: RAG Retrieval
+                const contextRecords = retrieveRelevantFormulas(userQueryVector);
+                const ragDocuments = contextRecords.map((rec, index) => {
+                    return llm.createDocument({
+                        id: `doc_${index}`,
+                        data: `Description: ${rec.description}\nSyntax: ${rec.syntax}`
+                    });
+                });
+
+                // Architectural Step 3: Generation and Strict Validation Loop
+                let currentPrompt = `You are a NetSuite PL/SQL expert. Write a NetSuite saved search formula for the following request: ${userQuery}. Return ONLY the raw formula text without markdown formatting or conversational filler.`;
+
+                while (validationAttempts < maxAttempts) {
+                    const llmResponse = llm.generateText({
+                        prompt: currentPrompt,
+                        documents: ragDocuments, 
+                        modelFamily: llm.ModelFamily.COHERE_COMMAND, 
+                        modelParameters: { temperature: 0.1, maxTokens: 1000 }
+                    });
+
+                    const generatedText = llmResponse.text.trim();
+                    const validation = validateFormulaSyntax(generatedText);
+                    
+                    if (validation.isValid) {
+                        finalFormula = generatedText;
+                        break; 
+                    } else {
+                        validationAttempts++;
+                        currentPrompt = `You previously generated this formula: ${generatedText}. It resulted in the following NetSuite compilation error: ${validation.error}. Please fix the syntax, resolve the error, and return ONLY the corrected raw formula text.`;
+                    }
+                }
+
+                // Prepare API Response
+                if (finalFormula) {
+                    responsePayload.success = true;
+                    responsePayload.formula = finalFormula;
+                } else {
+                    responsePayload.error = "Unable to generate a syntactically valid formula after 3 iterative attempts. Please refine the input prompt.";
+                }
+
+            } catch (err) {
+                responsePayload.error = "System Error: " + err.message;
+            }
+
+            // Return JSON back to the Chat UI
+            context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
+            context.response.write(JSON.stringify(responsePayload));
         }
-    }
+    };
 
-    return { onRequest: onRequest };
+    return { onRequest };
 });
