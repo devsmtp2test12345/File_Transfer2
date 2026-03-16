@@ -66,3 +66,9 @@ An unexpected SuiteScript error has occurred | Payload: {"type":"invoice","title
 
 
 Filters: [{"name":"entity","operator":"is","values":["This will be replaced by customer ID in application code"]},{"name":"status","operator":"is","values":["Invoice:Open"]},{"name":"trandate","operator":"within","values":["lastTwoWeeks"]}]
+
+
+
+
+
+{"success":false,"formula":"","error":"System Error: Unexpected token _ in JSON at position 0"}
