@@ -72,3 +72,12 @@ Filters: [{"name":"entity","operator":"is","values":["This will be replaced by c
 
 
 {"success":false,"formula":"","error":"System Error: Unexpected token _ in JSON at position 0"}
+
+
+customrecord_ns_formula_lib
+
+custrecord_formula_description
+
+custrecord_formula_syntax
+
+custrecord_formula_embedding
