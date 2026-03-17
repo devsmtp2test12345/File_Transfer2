@@ -1,0 +1,40 @@
+I want to show you a AI Saved Search Assistant. It’s a smart chatbot that builds NetSuite saved searches for you, completely automatically, just by chatting with it
+
+First, let's look at the interface.
+
+On the left, we have a Usage Tracker. Because AI has usage limits, this will shows you exactly how much Usage the bot has left for the month. It tracks 'Gen' for generating searches, and 'Embed' for deep background thinking.
+
+On the right is your Workspace. It looks just like a standard text message app. You simply type what you are looking for in plain English—like 'Create a search for customers with open sales orders'—hit the 'Build Search' button, and the bot goes to work."
+
+
+So, what happens behind the scenes when you hit send? 
+
+The step-by-step process is:
+
+First, the system takes your plain text and turns it into a mathematical fingerprint vectors.
+
+It uses this fingerprint to search a custom library of past saved searches where we have used the Vector embedding menas we store the data into mathematical figerprint means vectors.This helps finding relative things more easy and acuurate and fast. So It finds the best, most relevant examples to use as a guide.
+
+At the same time, the AI scans your sentence for any specific custom fields you might have mentioned. It automatically looks up the exact database IDs for those fields so the final search is perfectly customized to your system.
+
+Finally, it bundles your request, the past examples, and the custom field IDs, and hands them to the NetSuite AI. The AI then writes the exact JSON code needed to build your search."
+
+
+
+But here is the best part: the bot is completely autonomous and self-correcting, making it highly accurate.
+
+When the AI writes the code, it doesn't just hand it to you. It actively tries to save the search directly into NetSuite. 
+
+If NetSuite rejects it and throws an error, the bot catches that error. It reads what went wrong, goes back to the AI, and asks it to fix the mistake. 
+
+It will try to heal itself up to three times before giving up.
+
+Plus, it has built-in guardrails. If someone tries to chat with the bot about the weather or something unrelated, it recognizes that it's out of bounds and politely asks the user to stick to NetSuite topics.
+
+When it's done, you get a success message with the new Search ID, the code, and a button to view your brand-new saved search immediately."
+
+
+
+[Scene 5: Conclusion]
+Visual: Fade to your logo or contact information.
+Audio: "It’s fast, it learns from your system, and it fixes its own mistakes. Building saved searches has never been this easy."
