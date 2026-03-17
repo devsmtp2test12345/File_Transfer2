@@ -164,8 +164,8 @@ function (serverWidget, llm, search, query) {
                     <div class="quota-toggle" id="quota-toggle-icon">▼</div>
                 </div>
                 <div class="quota-details" id="quota-details-content">
-                    <strong style="color: #333;">Gen (Search Generation):</strong> The AI has the capacity to write and deploy approximately <strong>${genQuota}</strong> more searches for you this month.<br><br>
-                    <strong style="color: #333;">Embed (Deep Searching):</strong> The AI can perform <strong>${embedQuota}</strong> more intelligent background searches into the NetSuite knowledge base to understand your specific requests this month.
+                    <strong style="color: #333;">Gen (Search Generation):</strong> The AI has the capacity of total usage limit of <strong>${genQuota}</strong>  for you this month.<br><br>
+                    <strong style="color: #333;">Embed (Deep Searching):</strong> The AI has a total usage limit of <strong>${embedQuota}</strong> for background searches into the NetSuite knowledge base to understand your specific requests this month.
                 </div>
             </div>
             
