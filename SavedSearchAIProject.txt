@@ -1,0 +1,711 @@
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","fivedaysago"], 
+      "AND", 
+      ["trandate","within","fivedaysfromnow"], 
+      "AND", 
+      ["trandate","within","fourdaysago"], 
+      "AND", 
+      ["trandate","within","fourdaysfromnow"], 
+      "AND", 
+      ["trandate","within","ninetydaysago"], 
+      "AND", 
+      ["trandate","within","ninetydaysfromnow"], 
+      "AND", 
+      ["trandate","within","previousoneday"], 
+      "AND", 
+      ["trandate","within","samedayfiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","samedayfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samedaylastmonth"], 
+      "AND", 
+      ["trandate","within","samedaylastweek"], 
+      "AND", 
+      ["trandate","within","samedaymonthbeforelast"], 
+      "AND", 
+      ["trandate","within","samedayweekbeforelast"], 
+      "AND", 
+      ["trandate","within","sixtydaysago"], 
+      "AND", 
+      ["trandate","within","sixtydaysfromnow"], 
+      "AND", 
+      ["trandate","within","tendaysago"], 
+      "AND", 
+      ["trandate","within","tendaysfromnow"], 
+      "AND", 
+      ["trandate","within","thirtydaysago"], 
+      "AND", 
+      ["trandate","within","threedaysago"], 
+      "AND", 
+      ["trandate","within","threedaysfromnow"], 
+      "AND", 
+      ["trandate","within","today"], 
+      "AND", 
+      ["trandate","within","todaytoendofthismonth"], 
+      "AND", 
+      ["trandate","within","tomorrow"], 
+      "AND", 
+      ["trandate","within","twodaysago"], 
+      "AND", 
+      ["trandate","within","twodaysfromnow"], 
+      "AND", 
+      ["trandate","within","yesterday"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774425863735";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+
+====================
+
+
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","fivedaysago"], 
+      "AND", 
+      ["trandate","within","fivedaysfromnow"], 
+      "AND", 
+      ["trandate","within","fourdaysago"], 
+      "AND", 
+      ["trandate","within","fourdaysfromnow"], 
+      "AND", 
+      ["trandate","within","ninetydaysago"], 
+      "AND", 
+      ["trandate","within","ninetydaysfromnow"], 
+      "AND", 
+      ["trandate","within","previousoneday"], 
+      "AND", 
+      ["trandate","within","samedayfiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","samedayfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samedaylastmonth"], 
+      "AND", 
+      ["trandate","within","samedaylastweek"], 
+      "AND", 
+      ["trandate","within","samedaymonthbeforelast"], 
+      "AND", 
+      ["trandate","within","samedayweekbeforelast"], 
+      "AND", 
+      ["trandate","within","sixtydaysago"], 
+      "AND", 
+      ["trandate","within","sixtydaysfromnow"], 
+      "AND", 
+      ["trandate","within","tendaysago"], 
+      "AND", 
+      ["trandate","within","tendaysfromnow"], 
+      "AND", 
+      ["trandate","within","thirtydaysago"], 
+      "AND", 
+      ["trandate","within","threedaysago"], 
+      "AND", 
+      ["trandate","within","threedaysfromnow"], 
+      "AND", 
+      ["trandate","within","today"], 
+      "AND", 
+      ["trandate","within","todaytoendofthismonth"], 
+      "AND", 
+      ["trandate","within","tomorrow"], 
+      "AND", 
+      ["trandate","within","twodaysago"], 
+      "AND", 
+      ["trandate","within","twodaysfromnow"], 
+      "AND", 
+      ["trandate","within","yesterday"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774432146500";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (Days) (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+================
+
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","lastmonth"], 
+      "AND", 
+      ["trandate","within","lastmonthonefiscalquarterago"], 
+      "AND", 
+      ["trandate","within","lastmonthonefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastmonthtodate"], 
+      "AND", 
+      ["trandate","within","lastmonthtwofiscalquartersago"], 
+      "AND", 
+      ["trandate","within","lastmonthtwofiscalyearsago"], 
+      "AND", 
+      ["trandate","within","monthafternext"], 
+      "AND", 
+      ["trandate","within","monthafternexttodate"], 
+      "AND", 
+      ["trandate","within","monthbeforelast"], 
+      "AND", 
+      ["trandate","within","monthbeforelasttodate"], 
+      "AND", 
+      ["trandate","within","nextmonth"], 
+      "AND", 
+      ["trandate","within","nextonemonth"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalhalf"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthssamefiscalhalflastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthssamefiscalquarterlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthsthisfiscalhalf"], 
+      "AND", 
+      ["trandate","within","previousmonthsthisfiscalquarter"], 
+      "AND", 
+      ["trandate","within","previousmonthsthisfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousonemonth"], 
+      "AND", 
+      ["trandate","within","samedaylastmonth"], 
+      "AND", 
+      ["trandate","within","samedaymonthbeforelast"], 
+      "AND", 
+      ["trandate","within","samemonthfiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","samemonthfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalquartertodate"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","thismonth"], 
+      "AND", 
+      ["trandate","within","thismonthtodate"], 
+      "AND", 
+      ["trandate","within","threemonthsago"], 
+      "AND", 
+      ["trandate","within","threemonthsagotodate"], 
+      "AND", 
+      ["trandate","within","todaytoendofthismonth"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774432197272";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (Months) (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+=================
+
+
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","fiscalhalfbeforelast"], 
+      "AND", 
+      ["trandate","within","fiscalhalfbeforelasttodate"], 
+      "AND", 
+      ["trandate","within","fiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","fiscalquarterbeforelasttodate"], 
+      "AND", 
+      ["trandate","within","lastfiscalhalf"], 
+      "AND", 
+      ["trandate","within","lastfiscalhalfonefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastfiscalhalftodate"], 
+      "AND", 
+      ["trandate","within","lastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","lastfiscalquarteronefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastfiscalquartertodate"], 
+      "AND", 
+      ["trandate","within","lastfiscalquartertwofiscalyearsago"], 
+      "AND", 
+      ["trandate","within","lastmonthonefiscalquarterago"], 
+      "AND", 
+      ["trandate","within","lastmonthtwofiscalquartersago"], 
+      "AND", 
+      ["trandate","within","lastrollinghalf"], 
+      "AND", 
+      ["trandate","within","lastrollingquarter"], 
+      "AND", 
+      ["trandate","within","lastrollingquarter"], 
+      "AND", 
+      ["trandate","within","nextfiscalhalf"], 
+      "AND", 
+      ["trandate","within","nextfiscalquarter"], 
+      "AND", 
+      ["trandate","within","lastfiscalquarteronefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastfiscalquartertodate"], 
+      "AND", 
+      ["trandate","within","lastfiscalquartertwofiscalyearsago"], 
+      "AND", 
+      ["trandate","within","lastmonthonefiscalquarterago"], 
+      "AND", 
+      ["trandate","within","lastmonthtwofiscalquartersago"], 
+      "AND", 
+      ["trandate","within","lastrollinghalf"], 
+      "AND", 
+      ["trandate","within","lastrollingquarter"], 
+      "AND", 
+      ["trandate","within","nextfiscalhalf"], 
+      "AND", 
+      ["trandate","within","nextfiscalquarter"], 
+      "AND", 
+      ["trandate","within","nextonehalf"], 
+      "AND", 
+      ["trandate","within","nextonequarter"], 
+      "AND", 
+      ["trandate","within","previousfiscalquarterslastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousfiscalquartersthisfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalhalf"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","previousonehalf"], 
+      "AND", 
+      ["trandate","within","previousonequarter"], 
+      "AND", 
+      ["trandate","within","previousrollinghalf"], 
+      "AND", 
+      ["trandate","within","previousrollingquarter"], 
+      "AND", 
+      ["trandate","within","samedayfiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","samefiscalhalflastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samefiscalhalflastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterlastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","samemonthfiscalquarterbeforelast"], 
+      "AND", 
+      ["trandate","within","samemonthfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalquarter"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalquartertodate"], 
+      "AND", 
+      ["trandate","within","thisfiscalhalf"], 
+      "AND", 
+      ["trandate","within","thisfiscalhalftodate"], 
+      "AND", 
+      ["trandate","within","thisfiscalquarter"], 
+      "AND", 
+      ["trandate","within","thisfiscalquartertodate"], 
+      "AND", 
+      ["trandate","within","thisrollinghalf"], 
+      "AND", 
+      ["trandate","within","thisrollingquarter"], 
+      "AND", 
+      ["trandate","within","threefiscalquartersago"], 
+      "AND", 
+      ["trandate","within","threefiscalquartersagotodate"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774432269756";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (Quater) (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+
+===========
+
+
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","fourweeksstartingthisweek"], 
+      "AND", 
+      ["trandate","within","lastbusinessweek"], 
+      "AND", 
+      ["trandate","within","lastweek"], 
+      "AND", 
+      ["trandate","within","lastweektodate"], 
+      "AND", 
+      ["trandate","within","nextbusinessweek"], 
+      "AND", 
+      ["trandate","within","nextfourweeks"], 
+      "AND", 
+      ["trandate","within","nextoneweek"], 
+      "AND", 
+      ["trandate","within","nextweek"], 
+      "AND", 
+      ["trandate","within","previousoneweek"], 
+      "AND", 
+      ["trandate","within","samedaylastweek"], 
+      "AND", 
+      ["trandate","within","samedayweekbeforelast"], 
+      "AND", 
+      ["trandate","within","sameweekfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","thisbusinessweek"], 
+      "AND", 
+      ["trandate","within","thisweek"], 
+      "AND", 
+      ["trandate","within","thisweektodate"], 
+      "AND", 
+      ["trandate","within","weekafternext"], 
+      "AND", 
+      ["trandate","within","weekafternexttodate"], 
+      "AND", 
+      ["trandate","within","weekbeforelast"], 
+      "AND", 
+      ["trandate","within","weekbeforelasttodate"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774432286232";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (Weeks) (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+===========
+
+
+/** @NApiVersion 2.1 */
+const transactionSearchObj = search.create({
+   type: "transaction",
+   filters:
+   [
+      ["trandate","within","fiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","fiscalyearbeforelasttodate"], 
+      "AND", 
+      ["trandate","within","lastfiscalhalfonefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastfiscalquarteronefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastfiscalquartertwofiscalyearsago"], 
+      "AND", 
+      ["trandate","within","lastfiscalyear"], 
+      "AND", 
+      ["trandate","within","lastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","lastmonthonefiscalyearago"], 
+      "AND", 
+      ["trandate","within","lastmonthtwofiscalyearsago"], 
+      "AND", 
+      ["trandate","within","lastfiscalyear"], 
+      "AND", 
+      ["trandate","within","nextoneyear"], 
+      "AND", 
+      ["trandate","within","oneyearbeforelast"], 
+      "AND", 
+      ["trandate","within","previousfiscalquarterslastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousfiscalquartersthisfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthslastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthssamefiscalhalflastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthssamefiscalquarterlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousmonthsthisfiscalyear"], 
+      "AND", 
+      ["trandate","within","previousoneyear"], 
+      "AND", 
+      ["trandate","within","previousrollingyear"], 
+      "AND", 
+      ["trandate","within","samedayfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samedaylastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samefiscalhalflastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samefiscalhalflastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samefiscalquarterlastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalyear"], 
+      "AND", 
+      ["trandate","within","samemonthlastfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","sameweekfiscalyearbeforelast"], 
+      "AND", 
+      ["trandate","within","sameweeklastfiscalyear"], 
+      "AND", 
+      ["trandate","within","thisfiscalyear"], 
+      "AND", 
+      ["trandate","within","thisfiscalyeartodate"], 
+      "AND", 
+      ["trandate","within","thisrollingyear"], 
+      "AND", 
+      ["trandate","within","thisyear"], 
+      "AND", 
+      ["trandate","within","thisyeartodate"], 
+      "AND", 
+      ["trandate","within","threefiscalyearsago"], 
+      "AND", 
+      ["trandate","within","threefiscalyearsagotodate"]
+   ],
+   columns:
+   [
+      search.createColumn({name: "ordertype", label: "Order Type"}),
+      search.createColumn({name: "mainline", label: "*"}),
+      search.createColumn({name: "trandate", label: "Date"}),
+      search.createColumn({name: "asofdate", label: "As-Of Date"}),
+      search.createColumn({name: "postingperiod", label: "Period"}),
+      search.createColumn({name: "taxperiod", label: "Tax Period"}),
+      search.createColumn({name: "type", label: "Type"}),
+      search.createColumn({name: "tranid", label: "Document Number"}),
+      search.createColumn({name: "entity", label: "Name"}),
+      search.createColumn({name: "account", label: "Account"}),
+      search.createColumn({name: "memo", label: "Memo"}),
+      search.createColumn({name: "amount", label: "Amount"}),
+      search.createColumn({name: "custbody_ic_wappmesgsend_failurerror", label: "notifyIN Error log"}),
+      search.createColumn({name: "custbody_ic_whtappmessagestatus", label: "notifyIN Notification Status"}),
+      search.createColumn({name: "custbody_ic_approvalmsgsent", label: "notifyIN Approval Notification Sent"}),
+      search.createColumn({name: "custbody_ic_certficate", label: "Certificatelist"}),
+      search.createColumn({name: "custbody_sales_manager", label: "Sales Manager"}),
+      search.createColumn({name: "custbody_ic_invoiceduereminder", label: "Invoice Due Reminder Sent"}),
+      search.createColumn({name: "custbody_ic_custompdflink", label: "notifyIN_CustomPDF"}),
+      search.createColumn({name: "custbody_notifyin_triggermsg", label: "Trigger WhatsApp Message"}),
+      search.createColumn({name: "custbody_f_test", label: "test F"}),
+      search.createColumn({name: "custbody_cs_pymt_tran_level_type", label: "Transaction Level Type"}),
+      search.createColumn({name: "custbody_cs_pymt_mrn", label: "Merchant Reference Number"}),
+      search.createColumn({name: "custbody4", label: "Rejection Checkbox"}),
+      search.createColumn({name: "custbody_report_name", label: "Report Name (ZOHO)"})
+   ]
+});
+const searchResultCount = transactionSearchObj.runPaged().count;
+log.debug("transactionSearchObj result count",searchResultCount);
+transactionSearchObj.run().each(function(result){
+   // .run().each has a limit of 4,000 results
+   return true;
+});
+
+/*
+transactionSearchObj.id="customsearch1774432301273";
+transactionSearchObj.title="CRITERIA SAVED SEARCH (Year) (copy)";
+const newSearchId = transactionSearchObj.save();
+*/
+
+
+==============
