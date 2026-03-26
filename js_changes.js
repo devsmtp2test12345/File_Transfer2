@@ -2,15 +2,17 @@
  * @NApiVersion 2.1
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
- * * Architectural Blueprint: High-Accuracy Formula Generator BOT (Chat UI Edition)
- * Utilizes N/llm, Retrieval-Augmented Generation (RAG), programmatic search validation,
- * dynamic SuiteQL custom field extraction, collapsible usage quota limits/display, and an asynchronous conversational frontend.
+ * * Architectural Blueprint: Autonomous Saved Search Generator Bot (Chat UI Edition)
+ * Utilizes N/llm, Retrieval-Augmented Generation (RAG), Intention Analysis, SuiteScript JSON creation,
+ * active search.save() validation, dynamic SuiteQL custom field extraction, contextual date filters,
+ * usage quota limits, Out-Of-Domain (OOD) protection, dynamic search naming, and an asynchronous conversational frontend.
+ * Includes Graceful Fallback for returning Draft JSON and manual UI instructions on validation failure.
  */
 
 define(['N/ui/serverWidget', 'N/llm', 'N/search', 'N/query'], 
 function (serverWidget, llm, search, query) {
 
-    // --- Core Backend Functions (Untouched for stability) ---
+    // --- Core Backend Utility Functions ---
 
     const calculateCosineSimilarity = (vecA, vecB) => {
         let dotProduct = 0;
@@ -25,47 +27,98 @@ function (serverWidget, llm, search, query) {
         return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
     };
 
-    const retrieveRelevantFormulas = (userQueryVector) => {
-        const formulaLibrary = []; 
-        const formulaSearch = search.create({
-            type: 'customrecord_ns_formula_lib',
+    const getFormattedDateString = () => {
+        const d = new Date();
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        let hours = d.getHours();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; 
+        let minutes = d.getMinutes().toString().padStart(2, '0');
+        
+        return `(${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()} , ${hours.toString().padStart(2, '0')}:${minutes} ${ampm}, ${d.getFullYear()})`;
+    };
+
+    const generateUIInstructions = (jsonString) => {
+        try {
+            const config = JSON.parse(jsonString);
+            const recordType = config.type ? String(config.type).toUpperCase() : 'Desired Record Type';
+            
+            let html = `<div style="margin-top: 15px; padding: 15px; background-color: #fff8e1; border-left: 4px solid #ffb300; border-radius: 6px; color: #333;">`;
+            html += `<h4 style="margin-top:0; margin-bottom: 10px; color: #d84315;">🛠️ How to Create This Manually in NetSuite UI</h4>`;
+            html += `<ol style="margin-bottom: 0; padding-left: 20px; font-size: 13px; line-height: 1.6;">`;
+            html += `<li>Go to <strong>Lists > Search > Saved Searches > New</strong>.</li>`;
+            html += `<li>Select the <strong>${recordType}</strong> record type.</li>`;
+            html += `<li>Set the Search Title to <strong>${config.title || 'AI Generated Search'}</strong>.</li>`;
+            
+            if (config.filters && config.filters.length > 0) {
+                html += `<li>Navigate to the <strong>Criteria > Standard</strong> subtab and add these filters:<ul>`;
+                config.filters.forEach(f => {
+                    if (Array.isArray(f) && f.length >= 3) {
+                         html += `<li>Field: <code>${f[0]}</code> | Operator: <code>${f[1]}</code> | Value: <code>${f[2]}</code></li>`;
+                    } else if (f && typeof f === 'object' && f.name) {
+                         let val = f.values ? f.values.join(', ') : (f.formula || '');
+                         html += `<li>Field: <code>${f.name}</code> | Operator: <code>${f.operator || 'is'}</code> | Value: <code>${val}</code></li>`;
+                    }
+                });
+                html += `</ul></li>`;
+            }
+            
+            if (config.columns && config.columns.length > 0) {
+                html += `<li>Navigate to the <strong>Results > Columns</strong> subtab and add these fields:<ul>`;
+                config.columns.forEach(c => {
+                    if (typeof c === 'string') {
+                        html += `<li>Field: <code>${c}</code></li>`;
+                    } else if (c && typeof c === 'object' && c.name) {
+                        let extras = [];
+                        if (c.summary) extras.push(`Summary: <code>${c.summary}</code>`);
+                        if (c.formula) extras.push(`Formula: <code>${c.formula}</code>`);
+                        let extraStr = extras.length > 0 ? ` &mdash; <em>${extras.join(', ')}</em>` : '';
+                        html += `<li>Field: <code>${c.name}</code>${extraStr}</li>`;
+                    }
+                });
+                html += `</ul></li>`;
+            }
+            
+            html += `<li>Click <strong>Save & Run</strong>.</li>`;
+            html += `</ol></div>`;
+            return html;
+        } catch(e) {
+            return '';
+        }
+    };
+
+    // --- RAG & AI Extraction Functions ---
+
+    const retrieveRelevantSearches = (userQueryVector) => {
+        const searchLibrary = []; 
+        const libSearch = search.create({
+            type: 'customrecord_ns_savedsearches_lib',
             columns: [
-                'custrecord_formula_description', 
-                'custrecord_formula_syntax', 
-                'custrecord_formula_embedding'
+                'custrecord_savedsearches_description', 
+                'custrecord_savedsearches_code', 
+                'custrecord_savedsearches_embedding'
             ]
         });
 
-        formulaSearch.run().each(result => {
-            const embeddingString = result.getValue('custrecord_formula_embedding');
+        libSearch.run().each(result => {
+            const embeddingString = result.getValue('custrecord_savedsearches_embedding');
             if (embeddingString) {
                 const recordVector = JSON.parse(embeddingString);
                 const similarity = calculateCosineSimilarity(userQueryVector, recordVector);
-                formulaLibrary.push({
+                searchLibrary.push({
                     id: result.id,
-                    description: result.getValue('custrecord_formula_description'),
-                    syntax: result.getValue('custrecord_formula_syntax'),
+                    description: result.getValue('custrecord_savedsearches_description'),
+                    code: result.getValue('custrecord_savedsearches_code'),
                     score: similarity
                 });
             }
             return true;
         });
-        return formulaLibrary.sort((a, b) => b.score - a.score).slice(0, 3);
+        return searchLibrary.sort((a, b) => b.score - a.score).slice(0, 3);
     };
-
-    const validateFormulaSyntax = (formulaString) => {
-        try {
-            search.create({
-                type: search.Type.CUSTOMER,
-                columns: [search.createColumn({ name: 'formulatext', formula: formulaString })] 
-            });
-            return { isValid: true, error: null };
-        } catch (e) {
-            return { isValid: false, error: e.message };
-        }
-    };
-
-    // --- Agentic Extraction Backend Functions ---
 
     const extractFieldNames = (userQuery) => {
         const extractionPrompt = `Extract potential custom field names or labels from the following request. Return ONLY a valid JSON array of strings representing the field names. Do not include markdown, formatting, or explanations. Request: "${userQuery}"`;
@@ -79,7 +132,7 @@ function (serverWidget, llm, search, query) {
             
             let text = llmResponse.text.trim();
             if (text.startsWith('```')) {
-                text = text.replace(/```(json)?/g, '').trim();
+                text = text.replace(/```(json)?/gi, '').replace(/```/g, '').trim();
             }
             return JSON.parse(text);
         } catch (e) {
@@ -104,7 +157,7 @@ function (serverWidget, llm, search, query) {
                 mapping[res.name] = res.scriptid;
             });
         } catch (e) {
-            // Fail gracefully to avoid crashing the main execution loop
+            // Fail gracefully
         }
         return mapping;
     };
@@ -113,11 +166,11 @@ function (serverWidget, llm, search, query) {
 
     const generateChatbotUI = (isQuotaExhausted, genQuota, embedQuota) => {
         const botGreeting = isQuotaExhausted 
-            ? 'The AI Formula BOT is currently sleeping! 😴 We have exhausted our free NetSuite AI usage for the month. Please check back on the 1st.' 
-            : 'Hello! I am ready to generate and validate complex saved search formulas for you. What logic do you need help writing today?';
+            ? 'The AI Saved Search Bot is currently sleeping! 😴 We have exhausted our free NetSuite AI usage for the month. Please check back on the 1st.' 
+            : 'Hello! I am ready to intelligently configure and build new Saved Searches for you directly in NetSuite. What data do you need to find today?';
         
         const disableInputAttr = isQuotaExhausted ? 'disabled' : '';
-        const placeholderText = isQuotaExhausted ? 'Quota exhausted. BOT unavailable.' : 'e.g., Calculate days between date created and closed...';
+        const placeholderText = isQuotaExhausted ? 'Quota exhausted. Bot unavailable.' : 'e.g., Create a search for customers with open sales orders...';
 
         return `
         <style>
@@ -138,8 +191,11 @@ function (serverWidget, llm, search, query) {
             .user-msg { background-color: #607799; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
             .bot-msg { background-color: white; border: 1px solid #e1e5e8; color: #333; align-self: flex-start; border-bottom-left-radius: 2px; width: 100%; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
             .bot-msg pre { background-color: #2b303b; color: #c0c5ce; padding: 15px; border-radius: 6px; overflow-x: auto; font-family: 'Courier New', Courier, monospace; margin: 12px 0; font-size: 13px; }
-            .copy-btn { background-color: #e0e6ed; color: #333; border: 1px solid #cdd4dc; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
-            .copy-btn:hover { background-color: #d1d8e0; }
+            .action-btn { background-color: #e0e6ed; color: #333; border: 1px solid #cdd4dc; padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s; }
+            .action-btn:hover { background-color: #d1d8e0; }
+            .action-btn.view-btn { background-color: #2e7d32; color: white; border-color: #1b5e20; }
+            .action-btn.view-btn:hover { background-color: #1b5e20; }
+            .search-id-badge { display: inline-block; background-color: #e8f5e9; color: #2e7d32; padding: 6px 10px; border-radius: 4px; font-weight: bold; margin-bottom: 8px; border: 1px solid #c8e6c9; font-size: 13px;}
             #chat-input-area { display: flex; padding: 15px 20px; background-color: white; border-top: 1px solid #d3d8db; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; align-items: center; gap: 10px; }
             #chat-input { flex-grow: 1; padding: 12px 15px; border: 1px solid #cdd4dc; border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
             #chat-input:focus { border-color: #607799; }
@@ -148,6 +204,8 @@ function (serverWidget, llm, search, query) {
             #send-btn:hover { background-color: #3b495e; }
             #send-btn:disabled { background-color: #a0abbc; cursor: not-allowed; }
             .typing-indicator { font-style: italic; color: #7f8c8d; font-size: 13px; }
+            .button-row { display: flex; gap: 10px; margin-top: 10px; }
+            .error-notice { color: #d32f2f; }
         </style>
 
         <div id="bot-workspace">
@@ -157,27 +215,26 @@ function (serverWidget, llm, search, query) {
                     <div class="quota-toggle" id="quota-toggle-icon">▼</div>
                 </div>
                 <div class="quota-details" id="quota-details-content">
-                    <strong style="color: #333;">Gen (Word Generation):</strong> The AI has the capacity to write approximately <strong>${genQuota}</strong> more words, code snippets, or formulas for you this month.<br><br>
-                    <strong style="color: #333;">Embed (Deep Searching):</strong> The AI can perform <strong>${embedQuota}</strong> more intelligent background searches into the NetSuite database to understand your specific requests this month.
+                    <strong style="color: #333;">Gen (Search Generation):</strong> The AI has the capacity to write and deploy approximately <strong>${genQuota}</strong> more searches for you this month.<br><br>
+                    <strong style="color: #333;">Embed (Deep Searching):</strong> The AI can perform <strong>${embedQuota}</strong> more intelligent background searches into the NetSuite knowledge base to understand your specific requests this month.
                 </div>
             </div>
             
             <div id="chat-container">
                 <div id="chat-messages">
                     <div class="chat-message bot-msg">
-                        <strong>NetSuite AI Formula BOT</strong><br>
+                        <strong>NetSuite AI Saved Search Bot</strong><br>
                         ${botGreeting}
                     </div>
                 </div>
                 <div id="chat-input-area">
                     <input type="text" id="chat-input" placeholder="${placeholderText}" onkeypress="if(event.key === 'Enter') sendQuery()" ${disableInputAttr} />
-                    <button type="button" id="send-btn" onclick="sendQuery()" ${disableInputAttr}>Generate</button>
+                    <button type="button" id="send-btn" onclick="sendQuery()" ${disableInputAttr}>Build Search</button>
                 </div>
             </div>
         </div>
 
         <script>
-            // UI Toggle Logic
             function toggleQuotaDetails() {
                 const details = document.getElementById('quota-details-content');
                 const icon = document.getElementById('quota-toggle-icon');
@@ -190,7 +247,6 @@ function (serverWidget, llm, search, query) {
                 }
             }
 
-            // Core Chat Logic
             async function sendQuery() {
                 const inputField = document.getElementById('chat-input');
                 const sendBtn = document.getElementById('send-btn');
@@ -198,18 +254,15 @@ function (serverWidget, llm, search, query) {
 
                 if (!query) return;
 
-                // 1. Render User Message
                 appendMessage(query, 'user-msg');
                 inputField.value = '';
                 inputField.disabled = true;
                 sendBtn.disabled = true;
 
-                // 2. Render Loading State
                 const loadingId = 'loading-' + Date.now();
-                appendMessage('Thinking, generating, and compiling formula against NetSuite search engine...', 'bot-msg typing-indicator', loadingId);
+                appendMessage('Thinking, configuring search, and validating against NetSuite database schema...', 'bot-msg typing-indicator', loadingId);
 
                 try {
-                    // 3. Send Async POST Request to this Suitelet
                     const response = await fetch(window.location.href, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -217,26 +270,54 @@ function (serverWidget, llm, search, query) {
                     });
 
                     const data = await response.json();
-                    document.getElementById(loadingId).remove(); // Clear loading
+                    document.getElementById(loadingId).remove(); 
 
-                    // 4. Render Bot Response
                     if (data.success) {
-                        const formulaId = 'code-' + Date.now();
+                        const codeId = 'code-' + Date.now();
                         const htmlResponse = \`
-                            <strong>Validated Formula Generated:</strong>
-                            <pre id="\${formulaId}">\${escapeHtml(data.formula)}</pre>
-                            <button type="button" class="copy-btn" onclick="copyToClipboard('\${formulaId}', this)">
-                                📋 Copy Formula
-                            </button>
+                            <strong>✅ Saved Search Created Successfully!</strong><br><br>
+                            <div class="search-id-badge">Name: \${escapeHtml(data.searchName)}</div><br>
+                            <div class="search-id-badge">Internal ID: \${escapeHtml(data.savedSearchId)}</div><br>
+                            <em>Review the generated configuration below:</em>
+                            <pre id="\${codeId}">\${escapeHtml(data.searchCode)}</pre>
+                            
+                            <div class="button-row">
+                                <button type="button" class="action-btn" onclick="copyToClipboard('\${codeId}', this)">
+                                    📋 Copy JSON Config
+                                </button>
+                                <button type="button" class="action-btn view-btn" onclick="window.open('/app/common/search/searchresults.nl?searchid=\${data.savedSearchId}', '_blank')">
+                                    👁️ View Search
+                                </button>
+                            </div>
                         \`;
                         appendHtmlMessage(htmlResponse, 'bot-msg');
                     } else {
-                        // Dynamically adjust the error prefix based on the error context
-                        let errorPrefix = '❌ Validation Failed: ';
-                        if (data.error.includes("specialized NetSuite AI Formula BOT")) {
+                        // Handle standard errors vs OOD notices
+                        let errorPrefix = '<span class="error-notice">❌ Creation Failed:</span> ';
+                        if (data.error.includes("specialized NetSuite AI")) {
                             errorPrefix = '🤖 Notice: ';
                         }
-                        appendMessage(errorPrefix + data.error, 'bot-msg');
+                        
+                        let errorHtml = \`<strong>\${errorPrefix}</strong><br>\${escapeHtml(data.error)}\`;
+                        
+                        // If we have a draft fallback, render it with a copy button
+                        if (data.draftCode) {
+                            const draftId = 'draft-' + Date.now();
+                            errorHtml += \`<br><br><em>Draft Configuration (Requires Manual Fix):</em>
+                                <pre id="\${draftId}">\${escapeHtml(data.draftCode)}</pre>
+                                <div class="button-row">
+                                    <button type="button" class="action-btn" onclick="copyToClipboard('\${draftId}', this)">
+                                        📋 Copy Draft JSON
+                                    </button>
+                                </div>\`;
+                                
+                            // Append the generated UI steps if they exist
+                            if (data.manualStepsHtml) {
+                                errorHtml += data.manualStepsHtml;
+                            }
+                        }
+                        
+                        appendHtmlMessage(errorHtml, 'bot-msg');
                     }
                 } catch (error) {
                     document.getElementById(loadingId).remove();
@@ -249,7 +330,6 @@ function (serverWidget, llm, search, query) {
                 }
             }
 
-            // --- Helper Functions ---
             function appendMessage(text, className, id = '') {
                 const messagesArea = document.getElementById('chat-messages');
                 const msgDiv = document.createElement('div');
@@ -286,17 +366,22 @@ function (serverWidget, llm, search, query) {
             }
 
             function escapeHtml(unsafe) {
-                return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+                if (unsafe === null || unsafe === undefined) return '';
+                return String(unsafe)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
             }
         </script>
         `;
     };
 
     /**
-     * Primary Suitelet Request Handler executing the architectural flow.
+     * Primary Suitelet Request Handler
      */
     const onRequest = (context) => {
-        // Evaluate AI Usage Quotas
         let isQuotaExhausted = false;
         let genQuota = 'N/A';
         let embedQuota = 'N/A';
@@ -308,29 +393,20 @@ function (serverWidget, llm, search, query) {
                 isQuotaExhausted = true;
             }
         } catch (e) {
-            // Failsafe: If the quota check errors out, assume availability to prevent false blocking
             isQuotaExhausted = false;
         }
 
         if (context.request.method === 'GET') {
-            // Render the Chat UI wrapper
-            const form = serverWidget.createForm({ title: 'AI Formula Assistant', hideNavBar: false });
-            
-            const htmlField = form.addField({
-                id: 'custpage_chat_ui',
-                type: serverWidget.FieldType.INLINEHTML,
-                label: 'Chat UI'
-            });
-            
+            const form = serverWidget.createForm({ title: 'AI Saved Search Assistant', hideNavBar: false });
+            const htmlField = form.addField({ id: 'custpage_chat_ui', type: serverWidget.FieldType.INLINEHTML, label: 'Chat UI' });
             htmlField.defaultValue = generateChatbotUI(isQuotaExhausted, genQuota, embedQuota);
             context.response.writePage(form);
             
         } else if (context.request.method === 'POST') {
-            // Act as an API endpoint for the frontend Javascript
-            let responsePayload = { success: false, formula: '', error: '' };
+            let responsePayload = { success: false, searchCode: '', savedSearchId: '', searchName: '', error: '', draftCode: '', manualStepsHtml: '' };
 
             if (isQuotaExhausted) {
-                responsePayload.error = "The AI Formula BOT is currently sleeping! 😴 We have exhausted our free NetSuite AI usage for the month. Please check back on the 1st.";
+                responsePayload.error = "The AI Bot is currently sleeping! 😴 We have exhausted our free NetSuite AI usage for the month.";
                 context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
                 context.response.write(JSON.stringify(responsePayload));
                 return; 
@@ -340,83 +416,137 @@ function (serverWidget, llm, search, query) {
                 const requestBody = JSON.parse(context.request.body);
                 const userQuery = requestBody.query;
 
-                let finalFormula = '';
+                let finalSearchCode = '';
+                let createdSavedSearchId = '';
+                let createdSearchName = '';
+                let lastDraftedJson = ''; 
                 let validationAttempts = 0;
                 const maxAttempts = 3;
 
-                // Architectural Step 1: Vectorize the user's natural language query
+                // --- STEP 1: Intention Analysis ---
+                let analyzedIntention = '';
+                try {
+                    const intentPrompt = `Analyze the following user request for a NetSuite saved search. Explicitly state the core technical intent, identify the likely primary record type, and list the main filtering criteria. Keep it concise. Request: "${userQuery}"`;
+                    
+                    const intentResponse = llm.generateText({
+                        prompt: intentPrompt,
+                        modelFamily: llm.ModelFamily.COHERE_COMMAND,
+                        modelParameters: { temperature: 0.1, maxTokens: 100 }
+                    });
+                    
+                    analyzedIntention = intentResponse.text.trim();
+                } catch (intentErr) {
+                    // Silently fail and fallback to using just the userQuery for embedding
+                }
+
+                // Combine original query with the analyzed intention
+                const combinedSearchText = analyzedIntention 
+                    ? `Original Query: ${userQuery} | Technical Intent: ${analyzedIntention}` 
+                    : userQuery;
+
+                // --- STEP 2: Vectorize the Combined String ---
                 const queryEmbeddingResponse = llm.embed({
-                    inputs: [userQuery],
+                    inputs: [combinedSearchText],
                     embedModelFamily: llm.EmbedModelFamily.COHERE_EMBED
                 });
                 const userQueryVector = queryEmbeddingResponse.embeddings[0]; 
 
-                // Architectural Step 2: RAG Retrieval
-                const contextRecords = retrieveRelevantFormulas(userQueryVector);
+                // --- STEP 3: RAG Retrieval for Saved Searches ---
+                const contextRecords = retrieveRelevantSearches(userQueryVector);
                 const ragDocuments = contextRecords.map((rec, index) => {
                     return llm.createDocument({
                         id: `doc_${index}`,
-                        data: `Description: ${rec.description}\nSyntax: ${rec.syntax}`
+                        data: `Description: ${rec.description}\nCode/Syntax: ${rec.code}`
                     });
                 });
 
-                // Architectural Step 2.5: Agentic Field Extraction
+                // --- STEP 4: Agentic Field Extraction ---
                 let customFieldMappingText = "";
                 try {
                     const potentialFields = extractFieldNames(userQuery);
                     if (potentialFields && potentialFields.length > 0) {
                         const fieldMapping = lookupCustomFieldIds(potentialFields);
                         if (Object.keys(fieldMapping).length > 0) {
-                            customFieldMappingText = ` IMPORTANT: Use the following accurate NetSuite Script IDs for the requested custom fields: ${JSON.stringify(fieldMapping)}.`;
+                            customFieldMappingText = ` IMPORTANT: Use these accurate NetSuite Script IDs for the requested custom fields in your filters or columns: ${JSON.stringify(fieldMapping)}.`;
                         }
                     }
-                } catch (extractionErr) {
-                    // Fail silently here so the main generator loop still runs
+                } catch (extractionErr) {}
+
+                // --- STEP 4.5: Date Filter Context Injection (Cost-Optimized) ---
+                let dateFilterContext = "";
+                const dateKeywords = /day|month|year|quarter|week|today|tomorrow|yesterday|ago|next|last|prior|before|after/i;
+
+                if (dateKeywords.test(userQuery)) {
+                    // Highly compressed list to save LLM tokens
+                    const minifiedDates = `fivedaysago, fivedaysfromnow, fourdaysago, fourdaysfromnow, ninetydaysago, ninetydaysfromnow, previousoneday, samedayfiscalquarterbeforelast, samedayfiscalyearbeforelast, samedaylastfiscalquarter, samedaylastfiscalyear, samedaylastmonth, samedaylastweek, samedaymonthbeforelast, samedayweekbeforelast, sixtydaysago, sixtydaysfromnow, tendaysago, tendaysfromnow, thirtydaysago, threedaysago, threedaysfromnow, today, todaytoendofthismonth, tomorrow, twodaysago, twodaysfromnow, yesterday, lastmonth, lastmonthonefiscalquarterago, lastmonthonefiscalyearago, lastmonthtodate, lastmonthtwofiscalquartersago, lastmonthtwofiscalyearsago, monthafternext, monthafternexttodate, monthbeforelast, monthbeforelasttodate, nextmonth, nextonemonth, previousmonthslastfiscalhalf, previousmonthslastfiscalquarter, previousmonthslastfiscalyear, previousmonthssamefiscalhalflastfiscalyear, previousmonthssamefiscalquarterlastfiscalyear, previousmonthsthisfiscalhalf, previousmonthsthisfiscalquarter, previousmonthsthisfiscalyear, previousonemonth, samemonthfiscalquarterbeforelast, samemonthfiscalyearbeforelast, samemonthlastfiscalquarter, samemonthlastfiscalquartertodate, samemonthlastfiscalyear, samemonthlastfiscalyeartodate, thismonth, thismonthtodate, threemonthsago, threemonthsagotodate, fiscalhalfbeforelast, fiscalhalfbeforelasttodate, fiscalquarterbeforelast, fiscalquarterbeforelasttodate, lastfiscalhalf, lastfiscalhalfonefiscalyearago, lastfiscalhalftodate, lastfiscalquarter, lastfiscalquarteronefiscalyearago, lastfiscalquartertodate, lastfiscalquartertwofiscalyearsago, lastrollinghalf, lastrollingquarter, nextfiscalhalf, nextfiscalquarter, nextonehalf, nextonequarter, previousfiscalquarterslastfiscalyear, previousfiscalquartersthisfiscalyear, previousonehalf, previousonequarter, previousrollinghalf, previousrollingquarter, samefiscalhalflastfiscalyear, samefiscalhalflastfiscalyeartodate, samefiscalquarterfiscalyearbeforelast, samefiscalquarterlastfiscalyear, samefiscalquarterlastfiscalyeartodate, thisfiscalhalf, thisfiscalhalftodate, thisfiscalquarter, thisfiscalquartertodate, thisrollinghalf, thisrollingquarter, threefiscalquartersago, threefiscalquartersagotodate, fourweeksstartingthisweek, lastbusinessweek, lastweek, lastweektodate, nextbusinessweek, nextfourweeks, nextoneweek, nextweek, previousoneweek, sameweekfiscalyearbeforelast, thisbusinessweek, thisweek, thisweektodate, weekafternext, weekafternexttodate, weekbeforelast, weekbeforelasttodate, fiscalyearbeforelast, fiscalyearbeforelasttodate, lastfiscalyear, lastfiscalyeartodate, nextoneyear, oneyearbeforelast, previousoneyear, previousrollingyear, sameweeklastfiscalyear, thisfiscalyear, thisfiscalyeartodate, thisrollingyear, thisyear, thisyeartodate, threefiscalyearsago, threefiscalyearsagotodate`;
+                    
+                    dateFilterContext = ` IMPORTANT: The user is requesting a date filter. You MUST use one of these exact internal IDs for relative date filters if applicable: [${minifiedDates}]. Do NOT make up your own relative date strings.`;
                 }
 
-                // Architectural Step 3: Generation with Out-Of-Domain (OOD) Guardrail
-                let currentPrompt = `You are a strict NetSuite PL/SQL expert BOT. Analyze the request: "${userQuery}". If this request is a general question, conversational filler, or completely unrelated to NetSuite, saved searches, database logic, or formula generation, reply with the exact text: "OOD_REQUEST". Otherwise, write a NetSuite saved search formula for the request.${customFieldMappingText} Return ONLY the raw formula text (or "OOD_REQUEST"). No markdown, no conversational text.`;
+                // --- STEP 5: Generation & Active Save Validation ---
+                let currentPrompt = `You are a strict NetSuite SuiteScript 2.x expert bot. Analyze the request: "${userQuery}". If this is conversational or completely unrelated to NetSuite saved searches, reply with exactly: "OOD_REQUEST". Otherwise, generate the JSON configuration required for 'search.create(options)'. The JSON MUST strictly contain 'type' (a string internal id like 'salesorder', 'customer', etc.), 'filters' (a valid array of filter expressions/objects), 'columns' (an array of strings or column objects), and a 'title' (a concise, descriptive name based on the user's request, e.g., 'Top 10 Sellers This Week'). DO NOT include an 'id' in the JSON.${customFieldMappingText}${dateFilterContext} Return ONLY the raw, valid JSON object (or "OOD_REQUEST"). No markdown, no conversational text.`;
 
                 while (validationAttempts < maxAttempts) {
                     const llmResponse = llm.generateText({
                         prompt: currentPrompt,
                         documents: ragDocuments, 
                         modelFamily: llm.ModelFamily.COHERE_COMMAND, 
-                        modelParameters: { temperature: 0.1, maxTokens: 1000 }
+                        modelParameters: { temperature: 0.1, maxTokens: 1500 }
                     });
 
-                    const generatedText = llmResponse.text.trim();
+                    let generatedText = llmResponse.text.trim();
                     
-                    // Intercept off-topic questions instantly
                     if (generatedText.includes('OOD_REQUEST')) {
-                        responsePayload.error = "I am a specialized NetSuite AI Formula BOT. I can only answer questions and generate logic related to NetSuite saved searches formulas. Please ask me a formula-related question!";
+                        responsePayload.error = "I am a specialized NetSuite AI bot. I can only answer questions and generate logic related to creating NetSuite saved searches. Please ask me a search-related question!";
                         break; 
                     }
                     
-                    const validation = validateFormulaSyntax(generatedText);
-                    
-                    if (validation.isValid) {
-                        finalFormula = generatedText;
+                    try {
+                        if (generatedText.startsWith('```')) {
+                            generatedText = generatedText.replace(/^```(json)?/gi, '').replace(/```$/gi, '').trim();
+                        }
+                        
+                        const parsedSearchConfig = JSON.parse(generatedText);
+                        
+                        const timestamp = new Date().getTime();
+                        parsedSearchConfig.id = `customsearch_ai_bot_${timestamp}`;
+                        
+                        const llmGeneratedTitle = parsedSearchConfig.title || 'AI Generated Search';
+                        parsedSearchConfig.title = `${llmGeneratedTitle} ${getFormattedDateString()}`;
+
+                        // Capture the formatted JSON *before* NetSuite attempts to validate/save it
+                        lastDraftedJson = JSON.stringify(parsedSearchConfig, null, 4);
+
+                        const newSearch = search.create(parsedSearchConfig);
+                        createdSavedSearchId = newSearch.save(); 
+                        createdSearchName = parsedSearchConfig.title;
+                        
+                        finalSearchCode = lastDraftedJson;
                         break; 
-                    } else {
+
+                    } catch (e) {
                         validationAttempts++;
-                        currentPrompt = `You previously generated this formula: ${generatedText}. It resulted in the following NetSuite compilation error: ${validation.error}. Please fix the syntax, resolve the error, and return ONLY the corrected raw formula text.`;
+                        currentPrompt = `You generated this JSON: ${generatedText}. It resulted in this NetSuite compilation/save error: ${e.message}. Fix the JSON structure and valid search column/filter syntax. Return ONLY the corrected raw JSON.`;
                     }
                 }
 
                 // Prepare API Response
-                if (finalFormula) {
+                if (createdSavedSearchId) {
                     responsePayload.success = true;
-                    responsePayload.formula = finalFormula;
-                } else if (!responsePayload.error) {
-                    responsePayload.error = "Unable to generate a syntactically valid formula after 3 iterative attempts. Please refine the input prompt.";
+                    responsePayload.savedSearchId = String(createdSavedSearchId); 
+                    responsePayload.searchName = createdSearchName;
+                    responsePayload.searchCode = finalSearchCode;
+                } else if (!responsePayload.error && lastDraftedJson) {
+                    // Fallback triggered: provide the user with the last drafted code AND manual steps
+                    responsePayload.error = "I couldn't successfully save this to NetSuite (likely due to a missing or invalid custom field ID). However, I've generated a draft configuration for you below. You can copy this, update the field names, and use it in your code!";
+                    responsePayload.draftCode = lastDraftedJson;
+                    responsePayload.manualStepsHtml = generateUIInstructions(lastDraftedJson);
                 }
 
             } catch (err) {
                 responsePayload.error = "System Error: " + err.message;
             }
 
-            // Return JSON back to the Chat UI
             context.response.setHeader({ name: 'Content-Type', value: 'application/json' });
             context.response.write(JSON.stringify(responsePayload));
         }
