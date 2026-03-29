@@ -66,3 +66,56 @@ The Challenge: This requires using SUM and division within a single summary form
 
 The Expected Logic:
 SUM({quantityonhand} * {cost}) / NULLIF(SUM({quantityonhand}), 0)
+
+
+
+
+"1. The "Email Domain" Extractor (String/Parsing)
+The Goal: Take an email address (e.g., j.smith@google.com) and return only the domain (google.com).
+
+The Challenge: It has to find the "@" symbol, regardless of where it is, and grab everything to the right.
+
+The Expected Logic: SUBSTR({email}, INSTR({email}, '@') + 1)
+Or (Modern Regex): REGEXP_SUBSTR({email}, '@(.*)$', 1, 1, NULL, 1)
+
+2. The "Years & Months" Experience (Advanced Date Math)
+The Goal: Calculate how long a customer has been with you in a readable format, like: "5 Years, 3 Months".
+
+The Challenge: Simple subtraction gives you days. The bot must calculate the floor of years and the remainder of months.
+
+The Expected Logic: TRUNC(MONTHS_BETWEEN(SYSDATE, {datecreated}) / 12) || ' Years, ' || TRUNC(MOD(MONTHS_BETWEEN(SYSDATE, {datecreated}), 12)) || ' Months'
+
+3. The "Visual Progress Bar" (HTML/UI)
+The Goal: Create a literal progress bar in a column that fills up based on the "Percent Complete" field of a project.
+
+The Challenge: Using a <div> with a dynamic width and background color.
+
+The Expected Logic:
+'<div style="width: 100px; border: 1px solid #ccc; height: 10px;"><div style="width: ' || {percentcomplete} || 'px; background-color: ' || (CASE WHEN {percentcomplete} < 50 THEN 'red' ELSE 'green' END) || '; height: 10px;"></div></div>'
+
+4. The "Fiscal Year Offset" (Accounting Logic)
+The Goal: Many companies have a Fiscal Year that starts in July, not January. Given a date, return the "Fiscal Year" integer (e.g., 08/01/2025 should return 2026).
+
+The Challenge: Standard TO_CHAR(date, 'YYYY') will give you 2025. The bot must add 6 months before extracting the year.
+
+The Expected Logic: TO_CHAR(ADD_MONTHS({trandate}, 6), 'YYYY')
+
+5. The "Duplicate Check" Multi-Field (Complex Boolean)
+The Goal: Create a formula that returns "Flag" if the "Customer Name" and the "Zip Code" are identical to another record (this is usually used with COUNT in a summary search).
+
+The Challenge: Combining multiple fields into a unique string to be evaluated by a summary count.
+
+The Expected Logic: {companyname} || '_' || {billzipcode}
+(Then you would set the Summary Type to "Count" and the Filter to "Greater than 1")
+
+How to Evaluate the Bot's Output:
+Result Type	What it tells you about the Bot
+**Uses `	
+Uses INSTR or SUBSTR	It understands basic character positioning.
+Uses ADD_MONTHS or MOD	It understands advanced Oracle math functions.
+Hardcodes the logic	It’s a "Fixed Response" bot (not great).
+Explains why it used the function	It’s a high-quality AI collaborator.
+Try this prompt on your bot:
+"Write a NetSuite Formula (Text) that takes an email field {email} and returns everything after the '@' symbol. Do not use hardcoded lengths."
+
+If it gives you the SUBSTR(INSTR) logic, it's doing well. Would you like the "Search Criteria" setup for the Duplicate Check (Case #5) next?"
