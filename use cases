@@ -13,3 +13,10 @@ Business use cases would be :
 
 
 https://cybra.com/api_documentation/edgefinity-api-docs/api.html
+
+
+Calculate the number of days a Sales Order has been open, excluding Saturdays and Sundays.
+
+the Expected Logic: ({today}-{trandate}) - (DENSE_RANK() OVER (ORDER BY {trandate}) - DENSE_RANK() OVER (ORDER BY {today}))
+
+but it shown TRUNC(SYSDATE - {trandate})
