@@ -20,3 +20,49 @@ Calculate the number of days a Sales Order has been open, excluding Saturdays an
 the Expected Logic: ({today}-{trandate}) - (DENSE_RANK() OVER (ORDER BY {trandate}) - DENSE_RANK() OVER (ORDER BY {today}))
 
 but it shown TRUNC(SYSDATE - {trandate})
+
+
+
+Doesn't show the result
+The "Dynamic Tracking Link" (HTML)
+The Goal: Create a clickable link in a search result that says "Track Package." It should dynamically change the URL based on whether the carrier is UPS or FedEx.
+
+The Challenge: Combining string concatenation || with conditional CASE WHEN and HTML tags.
+
+The Expected Logic:
+CASE WHEN {shippingmethod} = 'UPS' 
+THEN '<a href="https://www.ups.com/track?tracknum=' || {trackingnumbers} || '" target="_blank">Track UPS</a>'
+WHEN {shippingmethod} = 'FedEx' 
+THEN '<a href="https://www.fedex.com/track?tracknumbers=' || {trackingnumbers} || '" target="_blank">Track FedEx</a>'
+ELSE 'No Tracking' END
+
+
+
+The "Weighted Average" (Summary Formula)
+The Goal: In a summary search of Items, calculate the weighted average cost, not just a simple average.
+
+The Challenge: This requires using SUM and division within a single summary formula.
+
+The Expected Logic:
+SUM({quantityonhand} * {cost}) / NULLIF(SUM({quantityonhand}), 0)
+
+shown result : CASE WHEN NVL({lastyearsales}, 0) = 0 THEN 0 ELSE (({thisyearsales} - {lastyearsales}) / NULLIF({lastyearsales}, 0)) * 100 END
+
+
+Doesn't show the result
+The "Clean Phone Number" (String Manipulation)
+The Goal: Take a phone number field that might look like (555) 123-4567 or 555.123.4567 and strip everything except the digits so it looks like 5551234567.
+
+The Challenge: It requires nested REPLACE functions or, ideally, a REGEXP_REPLACE.
+
+The Expected Logic: REGEXP_REPLACE({phone}, '[^0-9]', '')
+(If the bot uses 5 nested REPLACES, it’s "old school"—if it uses REGEXP, it's modern.)
+
+
+4. The "Weighted Average" (Summary Formula)
+The Goal: In a summary search of Items, calculate the weighted average cost, not just a simple average.
+
+The Challenge: This requires using SUM and division within a single summary formula.
+
+The Expected Logic:
+SUM({quantityonhand} * {cost}) / NULLIF(SUM({quantityonhand}), 0)
