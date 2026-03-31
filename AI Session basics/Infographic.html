@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concepts & Lifecycles: The 2026 Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .flow-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid #334155;
+            transition: transform 0.2s ease-in-out;
+        }
+        .flow-card:hover {
+            transform: translateY(-5px);
+            border-color: #06b6d4;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-cyan-500 selection:text-white">
+
+<!--
+CONFIRMATION: NEITHER Mermaid JS NOR SVG were used anywhere in this output.
+PALETTE: Vibrant Tech (Deep Blue #1e3a8a, Cyan #06b6d4, Pink #ec4899, Violet #8b5cf6, Bright Yellow #eab308)
+PLAN SUMMARY: 
+1. Intro/Hero: Sets the stage for the 2026 AI landscape, establishing the visual theme.
+2. Architectural Paradigms: Grid layout explaining foundational concepts like LMM, SLM, and MoE using everyday analogies.
+3. The Context Window Explosion: A section dedicated to the massive memory upgrades in 2026 models.
+4. API Economics & Context Caching: Visualizing the hidden costs of AI APIs (the 200k threshold) and the dramatic savings of caching.
+5. Model Development Lifecycle: A step-by-step HTML/CSS flowchart detailing the journey from Problem Definition to Deployment.
+VISUALIZATION CHOICES:
+- Data Point 1 (Context Window Size) -> Goal: Compare -> Chosen: Bar Chart -> Justification: Chart.js Bar chart effectively and starkly contrasts the massive quantitative difference between old context windows and 2026 context windows. (NO SVG)
+- Data Point 2 (API Cost Threshold) -> Goal: Change -> Chosen: Line Chart -> Justification: Chart.js Line chart clearly illustrates the sharp exponential cost increase once the 200k token threshold is crossed. (NO SVG)
+- Data Point 3 (Caching Economics) -> Goal: Compare -> Chosen: Bar Chart -> Justification: Chart.js Bar chart clearly shows the drastic cost drop-off when comparing uncached queries to cached queries. (NO SVG)
+- Data Point 4 (Development Lifecycle) -> Goal: Organize -> Chosen: HTML/CSS Flowchart -> Justification: Structured DOM elements map the step-by-step process cleanly without relying on prohibited external diagramming libraries or SVGs. (NO SVG)
+-->
+
+    <nav class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <span class="font-bold text-xl tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
+                    🧠 AI Guide 2026
+                </span>
+                <div class="hidden md:flex space-x-8 text-sm font-medium text-slate-300">
+                    <a href="#paradigms" class="hover:text-cyan-400 transition-colors">Paradigms</a>
+                    <a href="#context" class="hover:text-cyan-400 transition-colors">Context Windows</a>
+                    <a href="#economics" class="hover:text-cyan-400 transition-colors">API Economics</a>
+                    <a href="#lifecycle" class="hover:text-cyan-400 transition-colors">Lifecycle</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="relative py-24 overflow-hidden bg-slate-900">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-6">
+                AI Concepts & <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-violet-500 to-pink-500">Lifecycles</span>
+            </h1>
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-400">
+                Decoding the physical structure, training methodologies, and real-world deployment of modern Artificial Intelligence in the year 2026.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-32">
+
+        <section id="paradigms" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-100 mb-4">1. Architectural Paradigms</h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">The physical and logical structure of the AI. These are the "brains" driving the 2026 technological landscape.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">🖼️</div>
+                    <h3 class="text-xl font-bold text-cyan-400 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">🖼️</span> LMM
+                    </h3>
+                    <p class="text-sm text-slate-300 font-semibold mb-2">Large Multimodal Models</p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">Models that natively process text, image, audio, and video simultaneously without translator models.</p>
+                    <div class="bg-slate-900 rounded-lg p-4 border-l-4 border-cyan-500">
+                        <p class="text-xs text-slate-300 italic">"Think of a human with all five senses. It can see your expression, hear your tone, and read a document all at once."</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">📱</div>
+                    <h3 class="text-xl font-bold text-pink-400 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">📱</span> SLM
+                    </h3>
+                    <p class="text-sm text-slate-300 font-semibold mb-2">Small Language Models</p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">Highly optimized models (1B–7B parameters) designed to run directly on-device with near-frontier performance.</p>
+                    <div class="bg-slate-900 rounded-lg p-4 border-l-4 border-pink-500">
+                        <p class="text-xs text-slate-300 italic">"The Pocket Calculator. You don't need a supercomputer for daily tasks; it lives right on your phone."</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 text-6xl group-hover:opacity-20 transition-opacity">👨‍⚕️</div>
+                    <h3 class="text-xl font-bold text-yellow-400 mb-3 flex items-center gap-2">
+                        <span class="text-2xl">👨‍⚕️</span> MoE
+                    </h3>
+                    <p class="text-sm text-slate-300 font-semibold mb-2">Mixture of Experts</p>
+                    <p class="text-slate-400 text-sm leading-relaxed mb-4">Routes tasks to specialized "expert" sub-networks instead of using the whole model, making it drastically faster.</p>
+                    <div class="bg-slate-900 rounded-lg p-4 border-l-4 border-yellow-500">
+                        <p class="text-xs text-slate-300 italic">"A Hospital. When you walk in, only the X-ray tech and bone doctor wake up to treat your broken toe."</p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl relative overflow-hidden group md:col-span-2 lg:col-span-3 flex flex-col md:flex-row items-center gap-6">
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-violet-400 mb-3 flex items-center gap-2">
+                            <span class="text-2xl">🌍</span> World Models & <span class="text-2xl">🤖</span> Agentic AI
+                        </h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">
+                            Moving beyond simple text prediction. <strong>World Models</strong> simulate physical laws (gravity, collision) for realistic video generation. <strong>Agentic AI</strong> doesn't just chat; it plans multi-step tasks, uses browsers, and acts as a smart intern (e.g., booking your Expedia flights rather than just listing them).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="context" class="scroll-mt-24 bg-slate-800/50 rounded-3xl p-8 md:p-12 border border-slate-700">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="flex-1 space-y-6">
+                    <h2 class="text-3xl font-bold text-slate-100">2. The Context Window Explosion</h2>
+                    <p class="text-slate-400 leading-relaxed">
+                        The Context Window is the "short-term memory" of the model. In 2026, windows have expanded to <strong>10 million+ tokens</strong>, allowing models to process entire libraries in a single go. 
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="text-cyan-400 mr-3 text-xl">📝</span>
+                            <div>
+                                <strong class="text-slate-200 block">Small Context (Old AI)</strong>
+                                <span class="text-sm text-slate-400">A tiny "sticky note" desk. You forget what you read five minutes ago.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-pink-400 mr-3 text-xl">🏟️</span>
+                            <div>
+                                <strong class="text-slate-200 block">Huge Context (2M+ Tokens)</strong>
+                                <span class="text-sm text-slate-400">A desk the size of a football field. You can lay out 5,000 pages of documents and see everything instantly.</span>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="inline-block px-4 py-2 bg-slate-900 rounded-lg border border-slate-700 text-sm text-slate-300 font-mono">
+                        2 Million Tokens ≈ 1.5 Million Words
+                    </div>
+                </div>
+                
+                <div class="flex-1 w-full bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-inner">
+                    <h3 class="text-center text-sm font-semibold text-slate-400 mb-4 uppercase tracking-wider">Memory Capacity Comparison (Words)</h3>
+                    <div class="chart-container">
+                        <canvas id="contextChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="economics" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-100 mb-4">3. Context Window in API Calls</h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">Understanding the economics of massive context windows. Sending large prompts introduces new pricing paradigms like tiered billing and context caching.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+                    <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center gap-2">
+                        <span class="text-cyan-400 text-2xl">📈</span> The 200k Threshold
+                    </h3>
+                    <p class="text-sm text-slate-400 mb-6">
+                        Most APIs use Tiered Pricing. "Reading" more than 200,000 tokens heavily taxes computer memory, acting as a "Bulk Tax" where crossing the threshold doubles the price per token.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="thresholdChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-2xl p-8 border border-slate-700 shadow-xl">
+                    <h3 class="text-xl font-bold text-slate-200 mb-2 flex items-center gap-2">
+                        <span class="text-pink-400 text-2xl">💾</span> Context Caching Economics
+                    </h3>
+                    <p class="text-sm text-slate-400 mb-6">
+                        The "Save Game" trick. Like a Chef memorizing a recipe book once to cook faster later. Pay a higher first-write fee to get a 90% discount on all subsequent questions.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="cacheChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lifecycle" class="scroll-mt-24 mb-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-100 mb-4">4. Model Development Lifecycle</h2>
+                <p class="text-slate-400 max-w-3xl mx-auto">Creating a custom model (e.g., a "Grape Quality Detector") isn't just writing code. It's a pipeline flowing from raw data to real-world deployment.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-between items-stretch gap-4 md:gap-2">
+                
+                <div class="flow-card p-6 rounded-2xl flex-1 text-center relative z-10">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-cyan-500 rounded-full flex items-center justify-center text-3xl mb-4 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+                        🍇
+                    </div>
+                    <h4 class="font-bold text-slate-200 mb-2">Phase 1: Data</h4>
+                    <p class="text-xs text-slate-400 mb-3">The Foundation & Fuel</p>
+                    <ul class="text-left text-xs text-slate-300 space-y-2">
+                        <li><strong class="text-cyan-400">Define:</strong> Ripe vs Rotten</li>
+                        <li><strong class="text-cyan-400">Collect:</strong> 1,000 photos</li>
+                        <li><strong class="text-cyan-400">Label:</strong> Auto-tag via SAM</li>
+                        <li><strong class="text-cyan-400">Preprocess:</strong> Resize & Augment</li>
+                    </ul>
+                </div>
+
+                <div class="hidden md:flex flex-col justify-center items-center text-slate-600 text-3xl">➡️</div>
+                <div class="md:hidden flex justify-center text-slate-600 text-3xl py-2">⬇️</div>
+
+                <div class="flow-card p-6 rounded-2xl flex-1 text-center relative z-10">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-pink-500 rounded-full flex items-center justify-center text-3xl mb-4 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
+                        🧠
+                    </div>
+                    <h4 class="font-bold text-slate-200 mb-2">Phase 2: Modeling</h4>
+                    <p class="text-xs text-slate-400 mb-3">Brain Building</p>
+                    <ul class="text-left text-xs text-slate-300 space-y-2">
+                        <li><strong class="text-pink-400">Select:</strong> CNN vs ViT</li>
+                        <li><strong class="text-pink-400">Transfer:</strong> College Grad AI shortcut</li>
+                        <li><strong class="text-pink-400">Tune:</strong> Learning Rate & Epochs</li>
+                    </ul>
+                </div>
+
+                <div class="hidden md:flex flex-col justify-center items-center text-slate-600 text-3xl">➡️</div>
+                <div class="md:hidden flex justify-center text-slate-600 text-3xl py-2">⬇️</div>
+
+                <div class="flow-card p-6 rounded-2xl flex-1 text-center relative z-10">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-yellow-500 rounded-full flex items-center justify-center text-3xl mb-4 shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                        🧪
+                    </div>
+                    <h4 class="font-bold text-slate-200 mb-2">Phase 3: Evaluation</h4>
+                    <p class="text-xs text-slate-400 mb-3">The Testing Phase</p>
+                    <ul class="text-left text-xs text-slate-300 space-y-2">
+                        <li><strong class="text-yellow-400">Validate:</strong> Unseen photos</li>
+                        <li><strong class="text-yellow-400">Metrics:</strong> Accuracy vs Precision/Recall</li>
+                        <li><strong class="text-yellow-400">Check:</strong> Prevent Overfitting</li>
+                    </ul>
+                </div>
+
+                <div class="hidden md:flex flex-col justify-center items-center text-slate-600 text-3xl">➡️</div>
+                <div class="md:hidden flex justify-center text-slate-600 text-3xl py-2">⬇️</div>
+
+                <div class="flow-card p-6 rounded-2xl flex-1 text-center relative z-10">
+                    <div class="w-16 h-16 mx-auto bg-slate-800 border-2 border-violet-500 rounded-full flex items-center justify-center text-3xl mb-4 shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                        🚀
+                    </div>
+                    <h4 class="font-bold text-slate-200 mb-2">Phase 4: Deploy</h4>
+                    <p class="text-xs text-slate-400 mb-3">The Real World</p>
+                    <ul class="text-left text-xs text-slate-300 space-y-2">
+                        <li><strong class="text-violet-400">Quantize:</strong> Compress for mobile</li>
+                        <li><strong class="text-violet-400">Inference:</strong> Cloud API vs Edge</li>
+                        <li><strong class="text-violet-400">Monitor:</strong> Watch for Data Drift</li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-800 bg-slate-900 py-8 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>Data Source: AI Concepts & Lifecycles (The 2026 Guide) | Single Page Application Infographic</p>
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabel(text, limit = 16) {
+            if (text.length <= limit) return text;
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 <= limit) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            color: '#94a3b8',
+            plugins: {
+                legend: {
+                    labels: { color: '#e2e8f0', font: { family: "'Inter', sans-serif" } }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleColor: '#f8fafc',
+                    bodyColor: '#cbd5e1',
+                    borderColor: '#334155',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            } else {
+                                return label;
+                            }
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: '#94a3b8', font: { size: 11 } },
+                    grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                },
+                y: {
+                    ticks: { color: '#94a3b8', font: { size: 11 } },
+                    grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                }
+            }
+        };
+
+        const ctxContext = document.getElementById('contextChart').getContext('2d');
+        new Chart(ctxContext, {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('Old AI Models (Small Context)'),
+                    wrapLabel('2026 AI Models (Huge Context)')
+                ],
+                datasets: [{
+                    label: 'Word Capacity',
+                    data: [5000, 1500000],
+                    backgroundColor: [
+                        'rgba(6, 182, 212, 0.6)', 
+                        'rgba(236, 72, 153, 0.8)' 
+                    ],
+                    borderColor: [
+                        'rgb(6, 182, 212)',
+                        'rgb(236, 72, 153)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...commonOptions,
+                indexAxis: 'y',
+                scales: {
+                    x: {
+                        type: 'logarithmic',
+                        title: { display: true, text: 'Words (Log Scale)', color: '#94a3b8' },
+                        ticks: { color: '#94a3b8' },
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                    },
+                    y: {
+                        ticks: { color: '#e2e8f0', font: { weight: 'bold' } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        const ctxThreshold = document.getElementById('thresholdChart').getContext('2d');
+        new Chart(ctxThreshold, {
+            type: 'line',
+            data: {
+                labels: [
+                    wrapLabel('100k Tokens'), 
+                    wrapLabel('150k Tokens'), 
+                    wrapLabel('200k Threshold'), 
+                    wrapLabel('250k Tokens')
+                ],
+                datasets: [{
+                    label: 'Cost ($ per 1M rate)',
+                    data: [0.15, 0.30, 0.40, 1.00],
+                    borderColor: '#06b6d4',
+                    backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#1e293b',
+                    pointBorderColor: '#06b6d4',
+                    pointBorderWidth: 3,
+                    pointRadius: 6,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                ...commonOptions,
+                plugins: {
+                    ...commonOptions.plugins,
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: 2,
+                                xMax: 2,
+                                borderColor: '#ef4444',
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Cost in USD ($)', color: '#94a3b8' },
+                        ticks: { color: '#94a3b8', callback: function(value) { return '$' + value; } },
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                    },
+                    x: {
+                        ticks: { color: '#e2e8f0' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        const ctxCache = document.getElementById('cacheChart').getContext('2d');
+        new Chart(ctxCache, {
+            type: 'bar',
+            data: {
+                labels: [
+                    wrapLabel('No Cache (Every Question)'),
+                    wrapLabel('With Cache (1st Question)'),
+                    wrapLabel('With Cache (Subsequent)')
+                ],
+                datasets: [{
+                    label: 'Cost ($ per Query)',
+                    data: [4.00, 5.00, 0.40],
+                    backgroundColor: [
+                        'rgba(148, 163, 184, 0.6)', 
+                        'rgba(234, 179, 8, 0.8)',   
+                        'rgba(16, 185, 129, 0.8)'   
+                    ],
+                    borderColor: [
+                        'rgb(148, 163, 184)',
+                        'rgb(234, 179, 8)',
+                        'rgb(16, 185, 129)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        title: { display: true, text: 'Cost in USD ($)', color: '#94a3b8' },
+                        ticks: { color: '#94a3b8', callback: function(value) { return '$' + value; } },
+                        grid: { color: 'rgba(51, 65, 85, 0.5)' }
+                    },
+                    x: {
+                        ticks: { color: '#e2e8f0' },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
