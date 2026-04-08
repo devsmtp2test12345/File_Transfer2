@@ -1,1 +1,80 @@
 
+Here is a step-by-step transcript you can use for your demo, structured with visual cues to keep your screen actions and spoken words perfectly synced.
+
+
+Demo Transcript: Creating a Celigo MCP Server
+
+[Visual: Start on the Celigo home screen or dashboard]
+
+
+
+Speaker: "Hello everyone, and welcome to this quick demonstration on how to create and configure a Model Context Protocol, or MCP, server within Celigo. Today, I'll walk you through the entire process from navigating the menu to defining your endpoints and adding specific tools."
+
+[Visual: Move cursor to the left-hand navigation pane and expand 'AI studio']
+
+
+
+
+Speaker: "To get started, we’ll look at the left-hand navigation menu. Under the new AI studio section, click on MCP servers. This brings us to the main MCP server management page, where you can see a list of all your existing servers."
+
+[Visual: Point to the '+ Create MCP server' button in the top right corner (from the first image)]
+
+
+
+Speaker: "To build a new one from scratch, we’ll go up to the top right and click the '+ Create MCP server' button."
+
+[Visual: Transition to the 'Edit/Create MCP server' Configuration screen (from the second image)]
+
+
+
+
+Speaker: "This opens the Configuration tab. Let’s start by filling out the basic details.
+First, we need to give our server a name. I'll call this one 'MCP transaction Intelligence Server'.
+
+Next, I'll add a brief description so my team knows exactly what this does: 'Provides real-time access to CRM and ERP data via Celigo.'"
+
+[Visual: Highlight the 'Relative URI' field]
+
+
+
+
+Speaker: "Now, we need to set the Relative URI—this acts as the specific endpoint or alias for our server at the end of the base URL. For this demo, I’m simply going to enter '/all'."
+
+[Visual: Move cursor to the 'Tools' panel on the right side of the screen]
+
+
+
+
+Speaker: "With the basic configuration out of the way, it's time to give this server its capabilities by adding tools. On the right side of the screen, you'll see the Tools panel. You would normally click the 'Add tools' button to browse and select your available integrations."
+
+[Visual: Point out the three specific NetSuite tools and their aliases]
+
+
+
+
+Speaker: "For this intelligence server, I’ve added three specific API tools to pull NetSuite data.
+
+First, Get NS Customer, which uses the alias Get_NS_Customer.
+
+Second, Get NS Items, with the alias Get_NS_Items.
+
+And finally, Get NS Sales Order, using the alias Get_NS_Sales_Order.
+
+As you can see, I have the toggle switches set to the right for all three, ensuring they are active and enabled for this specific server."
+
+[Visual: Point to the bottom action bar (Save, Test server, Close)]
+
+
+Speaker: "Once your tools are added and your details are filled out, you can hit Save at the bottom left. You also have the option to hit Test server right here to ensure your connections and tools are firing correctly before pushing it live."
+
+[Visual: Transition back to the main 'MCP servers' list page (first image)]
+
+
+Speaker: "Finally, once saved, you'll be brought back to the main MCP servers list. You can see our new MCP transaction Intelligence Server listed here, complete with its generated URL and a confirmation that it has 3 tools attached.
+
+To activate it for your AI agents to use, simply click the Off/On toggle switch to turn it on."
+
+[Visual: Stop screen share or return to a static dashboard]
+
+
+Speaker: "And that’s it! In just a few minutes, we’ve successfully configured a new MCP server in Celigo, set its endpoints, and equipped it with the necessary tools to handle complex CRM and ERP data requests. Thank you for watching."
