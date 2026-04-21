@@ -1,0 +1,65 @@
+
+**[Scene Setup: Camera on you, welcoming the audience.]**
+
+"Hello everyone, and thank you for joining me. Today, I’m excited to demonstrate the power of Celigo’s AI Agents. 
+We are going to look at two specific use cases that showcase how these agents can seamlessly connect our workflows and bring 
+intelligent automation right into our daily communication tools, like Slack. 
+
+Let's dive right into our first use case
+
+
+Before we look at the actual integration, let's look at the logic behind it. As you can see on this flowchart, 
+the process begins when a user asks a question in Slack. The AI Agent interprets the intent of this message. 
+From there, it triggers our Celigo flow, retrieves the necessary data from **[System Name, e.g., NetSuite/Salesforce]**, 
+and routes the formatted answer back to the user in Slack. It’s a clean, closed-loop process."
+
+**[Action: Switch screen to the Celigo Flow Interface]**
+
+"Now, let's see how this is built in Celigo. Here is the flow that powers that logic. 
+
+* **Step 1:____
+
+
+**[Action: Switch screen to Slack]**
+
+Let’s see it in action. I’m playing the role of the user now. I'll simply type __ 
+
+And there it is! In fewseconds,
+ the AI Agent triggered the Celigo flow, grabbed the real-time data, and replied to me right here in the channel. 
+ No need to log into another system."
+
+---
+
+
+
+**[Action: Switch screen back to the presentation/Second Flowchart]**
+
+That brings us to our second use case: __. 
+
+Looking at our second flowchart, this process is slightly different.
+
+**[Action: Switch screen to the second Celigo Flow Interface]**
+
+"Moving over to Celigo, you can see this flow is __
+
+
+**[Action: Switch screen to Slack]**
+
+"Let’s test it out. I’ll type something natural, like: __
+
+
+Perfect. The AI understood the request, Celigo routed it to our helpdesk, and 
+I immediately have message analysis right here in Slack in user group."
+
+
+---
+
+### 🏁 Wrap-up
+
+**[Action: Stop screen sharing, back to camera]**
+
+As you've seen, combining Celigo's robust integration capabilities with AI Agents allows 
+us to turn standard chat interfaces into powerful command centers. It saves time, reduces context-switching, 
+and makes our backend systems incredibly accessible. 
+
+Thank you for watching!
